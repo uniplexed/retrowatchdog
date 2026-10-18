@@ -1,0 +1,70 @@
+{
+  "protocol": 3,
+  "plugin": {
+    "name": "wallapop",
+    "version": "1.0.0"
+  },
+  "requiredSecrets": [],
+  "sources": [
+    {
+      "id": "wallapop_es",
+      "kind": "live",
+      "label": "Wallapop Espa\u00f1a",
+      "family": "wallapop",
+      "familyLabel": "Wallapop",
+      "country": "ES",
+      "reach": "global",
+      "defaultRegion": null,
+      "expectedCurrencies": [
+        "EUR"
+      ],
+      "kindRoles": {
+        "active_listing": "buy_listing"
+      },
+      "kindLabels": {
+        "active_listing": "Wallapop Espa\u00f1a asking price"
+      },
+      "caveat": "Wallapop Espa\u00f1a is read through Wallapop's unofficial web API: asking prices from private sellers near one city, best-effort. Wallapop's terms of use require its express authorization to use it: https://about.wallapop.com/condiciones-de-uso/"
+    },
+    {
+      "id": "wallapop_it",
+      "kind": "live",
+      "label": "Wallapop Italia",
+      "family": "wallapop",
+      "familyLabel": "Wallapop",
+      "country": "IT",
+      "reach": "global",
+      "defaultRegion": null,
+      "expectedCurrencies": [
+        "EUR"
+      ],
+      "kindRoles": {
+        "active_listing": "buy_listing"
+      },
+      "kindLabels": {
+        "active_listing": "Wallapop Italia asking price"
+      },
+      "caveat": "Wallapop Italia is read through Wallapop's unofficial web API: asking prices from private sellers near one city, best-effort. Wallapop's terms of use require its express authorization to use it: https://about.wallapop.com/condiciones-de-uso/"
+    },
+    {
+      "id": "wallapop_pt",
+      "kind": "live",
+      "label": "Wallapop Portugal",
+      "family": "wallapop",
+      "familyLabel": "Wallapop",
+      "country": "PT",
+      "reach": "global",
+      "defaultRegion": null,
+      "expectedCurrencies": [
+        "EUR"
+      ],
+      "kindRoles": {
+        "active_listing": "buy_listing"
+      },
+      "kindLabels": {
+        "active_listing": "Wallapop Portugal asking price"
+      },
+      "caveat": "Wallapop Portugal is read through Wallapop's unofficial web API: asking prices from private sellers near one city, best-effort. Wallapop's terms of use require its express authorization to use it: https://about.wallapop.com/condiciones-de-uso/"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+ALTER TABLE "price_points" ADD COLUMN "available" boolean;

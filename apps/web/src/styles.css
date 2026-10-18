@@ -1,0 +1,574 @@
+/* Slate & Amber. Rules below these two blocks read tokens only, never a
+   literal colour. Light is the base; html[data-theme="dark"] redefines the
+   colours. Light's amber is a shade darker than the spec's #d97706 so white
+   text on it passes WCAG AA. */
+:root {
+  --font: "Inter Variable", system-ui, sans-serif;
+
+  --bg: #f4f6f9; --surface: #ffffff; --surface-2: #eef2f7; --border: #e2e8f0;
+  --text: #0f172a; --text-muted: #64748b; --text-faint: #94a3b8;
+  --accent: #b45309; --on-accent: #ffffff; --accent-soft: #fef3c7;
+  --buy: #15803d; --buy-soft: rgba(21, 128, 61, 0.10);
+  --avoid: #dc2626; --on-avoid: #ffffff; --avoid-soft: rgba(220, 38, 38, 0.10);
+  --neutral: #64748b;
+  --series-0: #2563eb; --series-1: #dc2626; --series-2: #059669;
+  --series-3: #d97706; --series-4: #7c3aed; --series-5: #0891b2;
+  --series-6: #ea580c; --series-7: #db2777;
+
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px;
+  --s-5: 20px; --s-6: 24px; --s-7: 28px; --s-8: 32px;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px;
+  --shadow-1: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-2: 0 2px 8px rgba(15, 23, 42, 0.08);
+  --shadow-3: 0 8px 24px rgba(15, 23, 42, 0.12);
+
+  color-scheme: light;
+}
+html[data-theme="dark"] {
+  --bg: #0b1220; --surface: #111a2e; --surface-2: #1e293b; --border: #1e293b;
+  --text: #e2e8f0; --text-muted: #94a3b8; --text-faint: #64748b;
+  --accent: #f59e0b; --on-accent: #1a1000; --accent-soft: #2a2410;
+  --buy: #4ade80; --buy-soft: rgba(74, 222, 128, 0.08);
+  --avoid: #f87171; --on-avoid: #1a0606; --avoid-soft: rgba(248, 113, 113, 0.08);
+  --neutral: #94a3b8;
+  --series-0: #60a5fa; --series-1: #f87171; --series-2: #34d399;
+  --series-3: #fbbf24; --series-4: #a78bfa; --series-5: #22d3ee;
+  --series-6: #fb923c; --series-7: #f472b6;
+  --shadow-1: none; --shadow-2: none; --shadow-3: 0 8px 24px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+/* Tonal buttons: a tint of the accent for the common case, the accent itself
+   for a form's submit. Class rules below override where a control has its own look. */
+button { padding: 8px 14px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); color: var(--text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+button:disabled { opacity: 0.45; cursor: default; }
+button[type="submit"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+button.delta-neg { background: var(--avoid-soft); border-color: transparent; }
+input, select, textarea { font: inherit; }
+input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), select, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 6px 10px; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.45 var(--font); }
+.num, td, .kpi-value { font-variant-numeric: tabular-nums; }
+/* Mobile-first; desktop gets a centered column (spec 10: usable on both) */
+.container { max-width: 640px; margin: 0 auto; padding: 12px 12px 72px; }
+/* .tabbar stays full-width for its background; justify-content centers the
+   button group itself so at desktop widths it lines up under the centered
+   .container instead of stretching into a near-invisible full-width sliver. */
+.tabbar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 5; display: flex; justify-content: center; background: var(--surface); border-top: 1px solid var(--border); }
+.tabbar button { flex: 1; max-width: 213px; margin: 6px 4px; padding: 10px 14px; border-radius: 999px; background: none; border: none; color: var(--text-muted); font-size: 14px; }
+.tabbar button.active { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+.search-input { width: 100%; padding: 12px 14px; font-size: 17px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+/* Base rule: .meta is muted secondary text WHEREVER it appears — the Settings
+   FX rows ("auto: 0.92" / "rate unavailable" / "· fetched …") rely on this
+   base rule for the spec's greyed auto reference.
+   jsdom tests cannot assert styles from this external sheet, hence this note. */
+.meta { color: var(--text-muted); font-size: 13px; }
+.badge { display: block; padding: 10px; border-radius: 8px; margin: 8px 0; font-size: 14px; }
+.badge.opportunity { background: var(--buy-soft); border: 1px solid var(--buy); }
+.badge.warning { background: var(--avoid-soft); border: 1px solid var(--avoid); }
+.badge.info { background: var(--surface-2); border: 1px solid var(--border); }
+/* confidence dimension: potential (downgraded) alerts render dashed; the
+   small ✔/❓ marker sits beside the type title */
+.badge.potential { border-style: dashed; }
+.confidence-marker { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.source-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-1); padding: var(--s-4); margin-top: var(--s-3); }
+.source-note { color: var(--text-muted); font-size: 13px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+td, th { padding: 6px 4px; text-align: left; border-bottom: 1px solid var(--border); }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.chips button { padding: 8px 14px; border-radius: 12px; font-size: 13px; }
+/* A row with a chosen option is a single-choice control: one bar, the choice filled. */
+.chips:has(button.active) { gap: 2px; padding: 3px; border-radius: var(--r-md); background: var(--surface-2); border: 1px solid var(--border); }
+.chips:has(button.active) button { flex: 1 1 auto; border: none; border-radius: var(--r-sm); background: none; color: var(--text-muted); font-weight: 500; padding: 6px 10px; }
+.chips:has(button.active) button.active { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: var(--shadow-1); }
+html[data-theme="dark"] .chips:has(button.active) button.active { background: var(--accent); color: var(--on-accent); }
+/* chip-styled links (e.g. the Export CSV download anchors next to the view toggle) */
+.chips a { padding: 8px 14px; border-radius: var(--r-md); border: 1px solid var(--border); background: var(--surface); color: var(--text); font-weight: 600; text-decoration: none; font-size: 13px; align-self: center; }
+
+/* game detail header: cover art beside the title */
+.game-header { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; margin: 12px 0; }
+.game-header img { width: 120px; border-radius: 10px; flex: none; }
+.game-header h2 { margin: 0; }
+
+/* ownership panel on GameDetail: styled like .source-block, one row per owned copy */
+.own-panel-totals { margin: 8px 0 0; padding-top: 8px; border-top: 1px solid var(--border); }
+.delta-pos { color: var(--buy); font-weight: 600; }
+.delta-neg { color: var(--avoid); font-weight: 600; }
+
+.value-basis { font-size: 11px; margin-left: 6px; }
+/* Settings "Collection value": one radio option per line, its reading greyed
+   beside it. The panel itself needs no rules — it is a plain .source-block
+   with an h3, named for assistive tech with role="group" + aria-labelledby.
+   It used to be a fieldset whose legend was restyled as the heading, which
+   cost it the sibling panels' spacing: a legend sits on the fieldset's top
+   border and does not collapse margins with what follows. */
+.basis-option { display: block; padding: 4px 0; }
+/* Settings "Valuation markets": one control per line with its honest line
+   underneath, OUTSIDE the label — inside it, the explanation would become part
+   of the control's accessible name ("Your country — where your collection…") */
+/* Settings "Markets": one group per service, its rows indented under it */
+.market-family { margin-top: 10px; }
+.market-family h4 { margin: 0 0 2px; font-size: 14px; }
+.market-family .market-field { padding: 2px 0 2px 8px; }
+.market-field { padding: 6px 0; }
+.market-field p.meta { margin: 2px 0 0; }
+.market-field select { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; }
+
+/* Plugins: name, version and status chip share one baseline. */
+.plugin-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.plugin-head h4 { margin: 0; }
+/* A neutral third tone: `off` is neither an opportunity (--ok, the base rule)
+   nor a warning (--avoid). */
+.badge-compact.muted { color: var(--text-muted); }
+/* Turn off and Remove sit apart from the controls that only change what a
+   plugin may do: on the old card they had the same weight as everything else,
+   and Remove is the one control here that cannot be undone. */
+.danger-zone { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+.danger-zone .meta { margin-right: auto; }
+.danger-zone button.delta-neg { border-color: var(--avoid); }
+/* The grants matrix. `table-layout: fixed` makes the columns share the card's
+   width instead of growing with the header text, so a long kind label wraps
+   its header rather than pushing a 375px page into horizontal scroll. */
+.grant-table { table-layout: fixed; margin-top: 6px; }
+.grant-table th:first-child, .grant-table td:first-child { width: 40%; font-weight: 400; }
+.grant-table th.grant, .grant-table td.grant { text-align: center; }
+.grant-table th { font-size: 13px; vertical-align: bottom; }
+.grant-table th .meta { display: block; font-weight: 400; }
+.role-legend p.meta { margin: 4px 0 0; }
+/* Whether the app queries one market, beside the boxes that say what it may be
+   used for. A switch rather than a checkbox because the two are different
+   questions and must not look like one more tick. */
+.market-switch { width: 34px; height: 19px; padding: 0; border: none; border-radius: 999px; background: var(--buy); position: relative; flex: none; cursor: pointer; }
+.market-switch[aria-checked="false"] { background: var(--border); }
+.market-switch:disabled { opacity: 0.45; cursor: default; }
+.market-switch i { position: absolute; top: 2px; right: 2px; width: 15px; height: 15px; border-radius: 50%; background: var(--bg); display: block; }
+.market-switch[aria-checked="false"] i { left: 2px; right: auto; }
+
+.currency-bar { display: flex; align-items: center; gap: 8px; }
+.currency-bar select { background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; font-size: 13px; }
+
+/* settings: one FX control row per currency */
+.fx-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.fx-row:last-child { border-bottom: none; }
+.fx-row strong { min-width: 42px; }
+.fx-row input[inputmode="decimal"] { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; }
+
+/* app branding: circular dog logo beside the title */
+.app-header { display: flex; align-items: center; gap: 12px; }
+.app-logo { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+
+
+/* cex buy/sell price mode switch: pill-shaped sliding toggle. The two
+   <button>s carry the real semantics (aria-pressed, native keyboard
+   operability) — the thumb is a purely decorative absolutely-positioned
+   span that slides via transform, positioned by the [data-mode] modifier. */
+.mode-switch { position: relative; display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); }
+.mode-switch button { position: relative; z-index: 1; flex: 1; min-width: 64px; padding: 6px 14px; border: none; border-radius: 999px; background: none; color: var(--text-muted); font: inherit; font-weight: 600; cursor: pointer; }
+.mode-switch button[aria-pressed="true"] { color: var(--on-accent); }
+.mode-switch-thumb { position: absolute; z-index: 0; top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px); border-radius: 999px; background: var(--accent); transition: transform 0.2s ease; }
+.mode-switch[data-mode="sell"] .mode-switch-thumb { transform: translateX(100%); }
+@media (prefers-reduced-motion: reduce) {
+  .mode-switch-thumb { transition: none; }
+}
+
+/* compact direction pills (SignalDirectionPill: extended badges, watchlist +
+   collection rows/cards). Base look is the --ok opportunity tone; warning
+   pills (⚠ overpriced @ X) swap to --avoid to keep the don't-buy reading. */
+.badge-compact { margin-right: 6px; }
+
+/* the Watchdog-barks header icon (Millie with her bone): small round crop
+   sitting on the h3 baseline beside the text */
+.barks-icon { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 10px; }
+
+/* match-review rows: cover thumbnail beside the current-link line */
+.review-row img { width: 40px; border-radius: 6px; vertical-align: middle; margin-right: 8px; }
+
+/* collapsible list controls (collection + watchlist): the ⚙ chips row plus
+   its expanded labeled chip groups; everything reuses the .chips look */
+.list-controls { margin: 10px 0; }
+.list-controls .chips { margin: 6px 0; }
+.control-group .control-label { align-self: center; min-width: 72px; padding-left: 8px; }
+.list-controls .control-clear { color: var(--accent); }
+
+/* group section headers rendered by the list screens when grouping is on */
+.group-header { margin: 14px 0 2px; }
+.group-header .meta { font-weight: 400; }
+
+/* Watchdog barks: one collapsible group per source inside a category. The
+   header is a real button (aria-expanded) controlling the rows' region; a
+   single-finding group has no control and renders its badge directly. */
+.bark-group { margin: 8px 0; }
+.bark-group > button { display: block; width: 100%; text-align: left; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border); background: none; color: var(--text); font-weight: 400; font-size: 14px; }
+.bark-group > button[aria-expanded="true"] { border-color: var(--accent); }
+
+/* CeX buy mode: out-of-stock rows fold under a collapsed native <details>
+   below the in-stock table; the summary reads as a muted note */
+.stock-details { margin-top: 8px; }
+.stock-details summary { color: var(--text-muted); font-size: 13px; cursor: pointer; }
+
+/* per-copy condition/grade slider (copy editor + add-copy form) */
+.grade-slider { display: inline-flex; align-items: center; gap: 8px; }
+.grade-slider input[type="range"] { width: 120px; accent-color: var(--accent); }
+
+/* inline owned-copy editor (game record's ownership panel + collection Cards
+   view): one field per label, wrapping on the phone; the ✎ edit button that
+   opens it sits in the row like a chip */
+.copy-editor { font-size: 14px; }
+.copy-editor label { display: inline-block; margin: 4px 8px 4px 0; }
+.copy-editor textarea { display: block; width: 100%; box-sizing: border-box; margin-top: 4px; }
+.edit-copy { padding: 4px 10px; border-radius: 999px; font-size: 13px; }
+
+/* game view's per-source history chart (viewBox-driven, no fixed width). No
+   preserveAspectRatio="none" on the <svg> and no fixed height here: with a
+   forced height against the 320x120 viewBox's own ratio, the axis/date text
+   and the dot rendered visibly stretched (measured 1.7x taller than wide at
+   phone width). height: auto lets the intrinsic ratio drive the box instead. */
+.history-chart { width: 100%; height: auto; display: block; }
+.history-axis { font-size: 7px; fill: var(--text-muted); }
+
+/* the chart's legend: one row per series, since touch has no hover tooltip */
+.price-history summary { cursor: pointer; }
+.history-legend { list-style: none; margin: 8px 0 0; padding: 0; font-size: 13px; }
+.history-legend-row { padding: 2px 0; }
+.history-swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; }
+.history-legend-span { color: var(--text-muted); }
+
+/* ---- src/ui components. Tokens only. ---- */
+.ui-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2); border: 1px solid transparent; border-radius: var(--r-md); font: inherit; font-weight: 600; line-height: 1.2; cursor: pointer; }
+.ui-btn-md { padding: 8px 14px; font-size: 14px; }
+.ui-btn-sm { padding: 4px 10px; font-size: 13px; border-radius: var(--r-sm); }
+.ui-btn-primary { background: var(--accent); color: var(--on-accent); }
+.ui-btn-secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
+.ui-btn-ghost { background: transparent; color: var(--accent); }
+.ui-btn-danger { background: var(--avoid-soft); color: var(--avoid); }
+.ui-btn:disabled { opacity: 0.45; cursor: default; }
+.ui-btn:focus-visible, .ui-seg button:focus-visible, .ui-switch:focus-visible, .ui-row-body:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.ui-pill { display: inline-block; padding: 1px 8px; border: 1px solid currentColor; border-radius: 999px; font-size: 12px; font-weight: 500; line-height: 1.5; white-space: nowrap; }
+.ui-pill-buy { color: var(--buy); }
+.ui-pill-avoid { color: var(--avoid); }
+.ui-pill-neutral { color: var(--neutral); }
+.ui-pill-potential { color: var(--neutral); border-style: dashed; }
+
+.ui-panel { margin-top: var(--s-3); padding: var(--s-4); background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-1); }
+.ui-panel-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); margin-bottom: var(--s-3); }
+.ui-panel-head h3 { margin: 0; font-size: 14px; font-weight: 600; }
+.ui-panel-action { color: var(--text-muted); font-size: 13px; }
+
+.ui-kpi { display: flex; flex-direction: column; gap: 2px; padding: var(--s-3) var(--s-4); background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--shadow-1); color: var(--text); font: inherit; text-align: left; }
+.ui-kpi-link { cursor: pointer; }
+.ui-kpi-label { color: var(--text-muted); font-size: 12px; }
+.ui-kpi-value { font-size: 22px; font-weight: 600; }
+.ui-kpi-delta { color: var(--text-muted); font-size: 12px; }
+
+.ui-row { display: flex; align-items: center; gap: var(--s-2); padding: var(--s-2) 0; border-bottom: 1px solid var(--border); }
+.ui-row:last-child { border-bottom: none; }
+.ui-row-body { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--s-3); padding: 0; border: none; background: none; color: var(--text); font: inherit; text-align: left; }
+button.ui-row-body { cursor: pointer; }
+.ui-row-body img, .ui-row-cover { flex: none; width: 36px; height: 48px; border-radius: var(--r-sm); object-fit: cover; background: var(--surface-2); }
+.ui-row-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ui-row-title { font-weight: 600; }
+.ui-row-meta { color: var(--text-muted); font-size: 13px; }
+.ui-row-right { margin-left: auto; text-align: right; white-space: nowrap; }
+.ui-row-actions { flex: none; display: flex; gap: var(--s-1); }
+
+.ui-seg { display: inline-flex; gap: 2px; padding: 3px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); }
+.ui-seg button { flex: 1 1 auto; padding: 5px 12px; border: none; border-radius: var(--r-sm); background: none; color: var(--text-muted); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+.ui-seg button.active { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: var(--shadow-1); }
+html[data-theme="dark"] .ui-seg button.active { background: var(--accent); color: var(--on-accent); }
+
+.ui-switch { position: relative; flex: none; width: 34px; height: 20px; padding: 0; border: none; border-radius: 999px; background: var(--border); cursor: pointer; }
+.ui-switch[aria-checked="true"] { background: var(--buy); }
+.ui-switch i { position: absolute; top: 2px; left: 2px; display: block; width: 16px; height: 16px; border-radius: 50%; background: var(--surface); box-shadow: var(--shadow-1); transition: transform 0.15s ease; }
+.ui-switch[aria-checked="true"] i { transform: translateX(14px); }
+.ui-switch:disabled { opacity: 0.45; cursor: default; }
+@media (prefers-reduced-motion: reduce) { .ui-switch i { transition: none; } }
+
+.ui-field { display: flex; flex-direction: column; gap: var(--s-1); padding: var(--s-2) 0; }
+.ui-field > label { font-size: 13px; font-weight: 600; }
+.ui-help { margin: 0; color: var(--text-muted); font-size: 12px; }
+
+.ui-fold { margin-top: var(--s-2); border: 1px dashed var(--border); border-radius: var(--r-md); }
+.ui-fold > summary { padding: var(--s-2) var(--s-3); color: var(--text-muted); font-size: 13px; cursor: pointer; }
+.ui-fold-body { padding: 0 var(--s-3) var(--s-3); }
+
+.ui-band { display: flex; flex-direction: column; gap: var(--s-1); padding: var(--s-2) var(--s-4); background: var(--accent-soft); border-bottom: 1px solid var(--border); color: var(--text); font-size: 13px; }
+.ui-band p { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); }
+
+/* ---- app shell (src/ui/AppShell.tsx) ---- */
+.shell-title { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 18px; font-weight: 600; }
+.shell-desktop .shell-title { font-size: 22px; }
+.shell-controls { display: flex; align-items: center; gap: var(--s-3); }
+.shell-top { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); padding: var(--s-2) var(--s-4); background: var(--bg); border-bottom: 1px solid var(--border); }
+.shell-mobile .shell-top { position: sticky; top: 0; z-index: 5; }
+.shell-desktop { display: flex; min-height: 100vh; }
+.shell-side { position: sticky; top: 0; flex: none; display: flex; flex-direction: column; gap: var(--s-1); width: 220px; height: 100vh; padding: var(--s-4) var(--s-3); background: var(--surface); border-right: 1px solid var(--border); }
+.shell-brand { display: flex; align-items: center; gap: var(--s-2); margin: 0 var(--s-2) var(--s-5); font-weight: 700; }
+.shell-brand .app-logo { width: 28px; height: 28px; }
+.shell-side nav { display: flex; flex-direction: column; gap: 2px; }
+.shell-side nav button { padding: 8px 12px; border: none; border-radius: var(--r-md); background: none; color: var(--text-muted); font: inherit; font-size: 14px; text-align: left; cursor: pointer; }
+.shell-side nav button:hover { background: var(--surface-2); color: var(--text); }
+.shell-side nav button.active { background: var(--surface-2); color: var(--text); font-weight: 600; }
+.shell-foot { margin-top: auto; padding: 0 var(--s-3); color: var(--text-faint); font-size: 12px; }
+.shell-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.shell-content { width: 100%; max-width: 1280px; margin: 0 auto; padding: var(--s-5) var(--s-6) var(--s-8); }
+
+/* ---- the verdict card (src/ui/Verdict.tsx) ---- */
+.ui-verdict { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-1); margin: var(--s-3) 0; padding: var(--s-4); border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-1); }
+.ui-verdict[data-tone="buy"] { border-color: var(--buy); background: var(--buy-soft); }
+.ui-verdict[data-tone="avoid"] { border-color: var(--avoid); background: var(--avoid-soft); }
+.ui-verdict-kicker { color: var(--text-muted); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.ui-verdict[data-tone="buy"] .ui-verdict-kicker { color: var(--buy); }
+.ui-verdict[data-tone="avoid"] .ui-verdict-kicker { color: var(--avoid); }
+.ui-verdict-title { margin: 0; font-size: 18px; font-weight: 600; }
+.ui-verdict[data-tone="neutral"] .ui-verdict-title { color: var(--text-muted); font-size: 15px; font-weight: 500; }
+.ui-verdict-reason { margin: 0; color: var(--text-muted); font-size: 13px; }
+.ui-verdict a.ui-btn { margin-top: var(--s-2); text-decoration: none; }
+.possible-count { margin-left: 4px; white-space: nowrap; }
+
+/* ---- Settings → Signals ---- */
+.signal-settings { margin-top: var(--s-6); }
+.signal-settings > h3 { margin: 0 0 var(--s-2); }
+.setting-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); padding: var(--s-2) 0; border-bottom: 1px solid var(--border); }
+.setting-row:last-child { border-bottom: none; }
+.setting-row > span { display: flex; flex-direction: column; }
+.setting-label { font-size: 14px; font-weight: 600; }
+.setting-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0 var(--s-4); }
+.setting-inline { display: inline-flex; align-items: center; gap: var(--s-2); margin-bottom: var(--s-2); }
+.setting-actions { display: flex; align-items: center; gap: var(--s-2); margin-top: var(--s-3); }
+
+/* ---- sheet, dialog, menu (src/ui/Sheet.tsx, Dialog.tsx, Menu.tsx) ---- */
+.ui-sheet-backdrop { position: fixed; inset: 0; z-index: 20; background: rgba(0, 0, 0, .35); }
+.ui-sheet { position: fixed; z-index: 21; left: 0; right: 0; bottom: 0; max-height: 85vh; display: flex; flex-direction: column; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--r-lg) var(--r-lg) 0 0; box-shadow: var(--shadow-3); outline: none; }
+.shell-desktop .ui-sheet { top: 0; left: auto; width: 420px; max-width: 100vw; max-height: none; border-width: 0 0 0 1px; border-radius: 0; }
+/* the handle's hit area is taller than the bar it draws */
+.ui-sheet-handle { align-self: center; width: 64px; height: 20px; margin-top: var(--s-1); background: linear-gradient(var(--border), var(--border)) center / 36px 4px no-repeat; touch-action: none; cursor: grab; }
+.shell-desktop .ui-sheet-handle { display: none; }
+.ui-sheet-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--border); }
+.ui-sheet-head h3 { margin: 0; font-size: 16px; font-weight: 600; }
+.ui-sheet-close { border: none; background: none; color: var(--text-muted); font-size: 16px; cursor: pointer; }
+.ui-sheet-body { overflow-y: auto; padding: var(--s-4); }
+.ui-dialog { position: fixed; z-index: 21; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(420px, calc(100vw - 32px)); padding: var(--s-5); background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-3); }
+.ui-dialog h3 { margin: 0 0 var(--s-2); font-size: 16px; }
+.ui-dialog p { margin: 0 0 var(--s-4); color: var(--text-muted); }
+.ui-dialog-actions { display: flex; justify-content: flex-end; gap: var(--s-2); }
+.ui-menu { position: relative; display: inline-block; }
+.ui-menu > summary { list-style: none; cursor: pointer; padding: 4px 10px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); color: var(--text-muted); }
+.ui-menu > summary::-webkit-details-marker { display: none; }
+.ui-menu-items { position: absolute; right: 0; z-index: 10; display: flex; flex-direction: column; gap: 2px; min-width: 200px; margin-top: var(--s-1); padding: var(--s-1); background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--shadow-2); }
+.ui-menu-items > button { padding: 8px 10px; border: none; border-radius: var(--r-sm); background: none; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.ui-menu-items > button:hover { background: var(--surface-2); }
+.ui-menu-items label { padding: 8px 10px; }
+
+/* ---- global search (src/components/GlobalSearch.tsx) ---- */
+.global-search { position: relative; width: 320px; }
+.global-search input { width: 100%; }
+.global-search-results { position: absolute; left: 0; right: 0; z-index: 10; max-height: 60vh; overflow-y: auto; margin-top: var(--s-1); padding: var(--s-1) var(--s-3); background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--shadow-2); }
+
+/* ---- dashboard (src/screens/DashboardScreen.tsx) ---- */
+.dash-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-3); }
+.dash-grid { display: grid; grid-template-columns: 3fr 2fr; gap: var(--s-4); align-items: start; }
+.dash-main, .dash-side { display: flex; flex-direction: column; min-width: 0; }
+.dash-todo { margin: 0; padding: 0; list-style: none; }
+
+/* ---- game page layout (src/screens/GameDetail.tsx) ---- */
+.shell-desktop .game-layout { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--s-5); align-items: start; }
+.game-main, .game-side { min-width: 0; }
+.game-actions { display: flex; align-items: center; gap: var(--s-2); margin-left: auto; }
+.game-main > .ui-seg { margin-top: var(--s-2); }
+
+/* ---- plugins list (src/components/PluginsPanel.tsx) ---- */
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; vertical-align: middle; background: var(--neutral); }
+.dot-ok { background: var(--buy); }
+.dot-warning { background: var(--accent); }
+.ui-dialog p { white-space: pre-line; }
+
+/* ---- settings sections (src/screens/SettingsScreen.tsx) ---- */
+.settings-desktop { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: var(--s-5); align-items: start; }
+.settings-desktop nav { position: sticky; top: var(--s-4); display: flex; flex-direction: column; gap: 2px; }
+.settings-desktop nav button { padding: 8px 12px; border: none; border-radius: var(--r-md); background: none; color: var(--text-muted); font: inherit; text-align: left; cursor: pointer; }
+.settings-desktop nav button:hover { background: var(--surface-2); color: var(--text); }
+.settings-desktop nav button.active { background: var(--surface-2); color: var(--text); font-weight: 600; }
+.settings .ui-fold { margin-top: var(--s-2); }
+
+/* ---- swipe row (src/ui/SwipeRow.tsx) ---- */
+.ui-swipe { position: relative; overflow: hidden; touch-action: pan-y; }
+.ui-swipe-body { position: relative; z-index: 1; background: var(--surface); transition: transform .18s ease; }
+.ui-swipe-actions { position: absolute; top: 0; right: 0; bottom: 0; display: flex; }
+.ui-swipe-action { padding: 0 var(--s-4); border: none; background: var(--surface-2); color: var(--text); font: inherit; cursor: pointer; }
+.ui-swipe-action.danger { background: var(--avoid); color: var(--on-avoid); }
+.shell-mobile .ui-swipe.open .ui-swipe-body { transform: translateX(calc(-1 * var(--swipe-w, 160px))); }
+.shell-mobile .ui-swipe-action { width: 80px; padding: 0; }
+/* desktop: the actions sit beside the row and show on hover or focus */
+.shell-desktop .ui-swipe { display: flex; align-items: center; }
+.shell-desktop .ui-swipe-body { flex: 1; min-width: 0; }
+.shell-desktop .ui-swipe-actions { position: static; gap: var(--s-1); opacity: 0; transition: opacity .12s; }
+.shell-desktop .ui-swipe:hover .ui-swipe-actions, .shell-desktop .ui-swipe:focus-within .ui-swipe-actions { opacity: 1; }
+.shell-desktop .ui-swipe-action { padding: 4px 10px; border-radius: var(--r-sm); }
+@media (prefers-reduced-motion: reduce) { .ui-swipe-body { transition: none; } }
+
+/* ---- search: today line (src/screens/SearchScreen.tsx) ---- */
+.today-line { display: block; width: 100%; margin-top: var(--s-3); padding: var(--s-3) var(--s-4); border: 1px solid var(--border); border-radius: var(--r-md); background: var(--accent-soft); color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+
+/* ---- list rows (Watchlist, Collection) ---- */
+.list-head { display: flex; align-items: flex-start; flex-wrap: wrap; gap: var(--s-2); margin-bottom: var(--s-2); }
+.list-head .list-controls { flex: 1; min-width: 0; }
+.chip { padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text-muted); font: inherit; font-size: 13px; cursor: pointer; }
+.chip.active { background: var(--accent-soft); border-color: var(--accent); color: var(--text); font-weight: 600; }
+.verdict-line { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; white-space: normal; font-size: 13px; }
+.verdict-buy { color: var(--buy); font-weight: 600; }
+.verdict-avoid { color: var(--avoid); font-weight: 600; }
+.ui-menu-items > a { padding: 8px 10px; border-radius: var(--r-sm); color: var(--text); text-decoration: none; }
+.ui-menu-items > a:hover { background: var(--surface-2); }
+
+/* ---- one signal as a line (src/components/SignalBadge.tsx), not a box ---- */
+.signal-line { display: block; margin: var(--s-2) 0; padding: var(--s-2) var(--s-3); border-left: 3px solid var(--border); font-size: 14px; }
+.signal-line.opportunity { border-left-color: var(--buy); }
+.signal-line.warning { border-left-color: var(--avoid); }
+.signal-line.potential { border-left-style: dashed; }
+.row-notes { display: block; }
+
+/* a segmented control never widens the page: on a narrow screen it wraps */
+.ui-seg { max-width: 100%; flex-wrap: wrap; }
+/* a list row's right side wraps rather than pushing past the screen */
+.ui-row-right { min-width: 0; max-width: 50%; white-space: normal; }
+.copy-value { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+
+/* the phone shows the figures two by two */
+.shell-mobile .dash-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); flex: 1; }
+.shell-mobile .ui-kpi-value { font-size: 20px; }
+
+/* ---- unified price table (src/components/UnifiedPriceTable.tsx) ---- */
+.table-scroll { overflow-x: auto; max-width: 100%; }
+.price-table { width: 100%; table-layout: fixed; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.price-table td { overflow-wrap: anywhere; }
+/* the phone drops the date column: the table must fit the screen */
+.shell-mobile .price-table .col-updated, .shell-mobile .price-table .col-tier { display: none; }
+.price-table .row-tier { display: none; }
+.shell-mobile .price-table .row-tier { display: block; font-size: 12px; }
+.shell-mobile .price-table { font-size: 13px; }
+.shell-mobile .price-table th, .shell-mobile .price-table td { padding: 6px 4px; }
+.price-table th, .price-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+.price-table td.price { white-space: nowrap; }
+.th-sort { padding: 0; border: none; background: none; color: inherit; font: inherit; font-weight: 600; cursor: pointer; text-decoration: underline dotted; }
+.game-main, .game-side, .ui-panel { min-width: 0; }
+.price-table .col-source { width: 16%; }
+.price-table .col-tier { width: 11%; }
+.price-table .col-grade { width: 9%; }
+.price-table .col-price { width: 13%; }
+.price-table .col-updated { width: 12%; }
+.shell-mobile .price-table .col-source { width: 27%; }
+.shell-mobile .price-table .col-grade { width: 15%; }
+.shell-mobile .price-table .col-price { width: 22%; }
+
+/* a touch screen wide enough for the desktop shell has no hover: its row actions always show */
+@media (hover: none) {
+  .shell-desktop .ui-swipe-actions { opacity: 1; }
+}
+
+/* a keyboard on a hidden phone action slides its row open */
+.shell-mobile .ui-swipe:focus-within .ui-swipe-body { transform: translateX(calc(-1 * var(--swipe-w, 160px))); }
+
+.currency-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  margin: 8px 0;
+  padding: 0;
+}
+.currency-chips button {
+  margin-left: 4px;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.spark {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 8px;
+  color: var(--text-muted);
+  vertical-align: middle;
+}
+.spark-change {
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.reliability {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.reliability th,
+.reliability td {
+  text-align: right;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+}
+.reliability th:first-child,
+.reliability td:first-child {
+  text-align: left;
+}
+.insights {
+  display: grid;
+  gap: 16px;
+}
+
+.rec-field .off-default input {
+  border-color: var(--accent);
+}
+.insights-charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+
+/* ⓘ beside a title: hover, focus or a tap shows what it does with an example */
+.info-tip { position: relative; display: inline-flex; align-items: center; margin-left: 6px; vertical-align: middle; }
+.info-tip-button {
+  border: 0; background: none; padding: 0 2px; cursor: help;
+  color: var(--text-muted); font-size: 0.9em; line-height: 1;
+}
+.info-tip-button:hover, .info-tip-button:focus-visible { color: var(--accent); }
+.info-tip-box {
+  display: block; position: absolute; z-index: 20; top: calc(100% + 6px); left: -8px;
+  width: max-content; max-width: min(320px, 80vw);
+  padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text);
+  font-size: 0.8rem; font-weight: 400; line-height: 1.4; text-align: left; white-space: normal;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+.info-tip-example { display: block; margin-top: 4px; color: var(--text-muted); font-style: normal; }
+.ui-panel-title, .title-with-tip, .settings-nav-item { display: flex; align-items: center; }
+.ebay-block { border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-2) var(--s-3); margin-bottom: var(--s-3); }
+.ebay-block h4, .ebay-block + div h4 { margin: 0 0 var(--s-1); font-size: 13px; color: var(--text-muted); }
+.legal-ack { display: flex; gap: var(--s-2); align-items: flex-start; margin: var(--s-3) 0; }
+.legal-ack input { margin-top: 3px; }
+.title-with-tip h3 { margin-bottom: 0; }
+.title-with-tip { margin-bottom: var(--s-2); }
+.ui-kpi-box { position: relative; display: flex; }
+.ui-kpi-box > .ui-kpi { flex: 1; }
+.ui-kpi-info { position: absolute; top: 10px; right: 10px; }
+.settings-nav-item > button { flex: 1; }
+
+/* phone: the box opens as a strip inside the screen, never past its edge */
+.shell-mobile .info-tip-box {
+  position: fixed; left: 16px; right: 16px; top: auto; bottom: 76px;
+  width: auto; max-width: none;
+}
+/* the phone's top bar has no room for the page title's tip */
+.shell-mobile .shell-title + .info-tip { display: none; }
+
+.th-sort { border: 0; background: none; padding: 0; color: inherit; font: inherit; cursor: pointer; }
+.th-sort:hover { color: var(--accent); }
+
+/* the short columns never split ("unknown", dates, prices); only What wraps */
+.price-table td.col-tier, .price-table td.col-updated, .price-table td.price, .price-table th { overflow-wrap: normal; white-space: nowrap; }
+.price-table td.what { overflow-wrap: anywhere; min-width: 160px; }
+.shell-desktop .price-table { table-layout: auto; }

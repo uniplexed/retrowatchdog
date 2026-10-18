@@ -1,0 +1,39 @@
+# Secrets - never commit
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Logs
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+
+# Python build artifacts (services/vinted-sidecar/)
+__pycache__/
+*.py[cod]
+.pytest_cache/
+/dog.png
+/dogfound.png
+
+# DB dumps and CSV exports taken as safety nets before a destructive op
+/backups/
+
+# Internal design records and agent scratch: kept locally, not published
+/docs/superpowers/
+
+# Local agent instructions and editor tooling: not published
+/CLAUDE.md
+/.claude/

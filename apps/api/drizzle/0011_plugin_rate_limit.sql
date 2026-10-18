@@ -1,0 +1,1 @@
+ALTER TABLE "plugins" ADD COLUMN "rate_limit_ms" integer;

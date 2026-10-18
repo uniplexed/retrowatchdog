@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1671,
+    "alternative_names": [{ "id": 177508, "name": " Azel Panzer Dragoon RPG" }],
+    "first_release_date": 886032000,
+    "name": "Panzer Dragoon Saga",
+    "platforms": [32],
+    "cover": { "id": 9999, "image_id": "co1abc" }
+  },
+  {
+    "id": 424242,
+    "name": "Sonic the Hedgehog Test Double",
+    "platforms": [29, 64, 35],
+    "first_release_date": 675820800,
+    "alternative_names": []
+  }
+]

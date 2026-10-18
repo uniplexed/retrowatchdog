@@ -1,0 +1,128 @@
+{
+  "protocol": 3,
+  "plugin": {
+    "name": "ebay",
+    "version": "1.0.0"
+  },
+  "requiredSecrets": [
+    "EBAY_CLIENT_ID",
+    "EBAY_CLIENT_SECRET"
+  ],
+  "sources": [
+    {
+      "id": "ebay_uk",
+      "kind": "live",
+      "label": "eBay UK",
+      "family": "ebay",
+      "familyLabel": "eBay",
+      "country": "GB",
+      "reach": "global",
+      "defaultRegion": null,
+      "expectedCurrencies": [
+        "GBP"
+      ],
+      "kindRoles": {
+        "active_median": "reference",
+        "active_listing": "buy_listing"
+      },
+      "kindLabels": {
+        "active_median": "eBay UK median (active)",
+        "active_listing": "eBay UK listing"
+      },
+      "caveat": "eBay UK prices are active FIXED-PRICE listings, not sold prices.",
+      "sellFeeRate": 0.13
+    },
+    {
+      "id": "ebay_de",
+      "kind": "live",
+      "label": "eBay DE",
+      "family": "ebay",
+      "familyLabel": "eBay",
+      "country": "DE",
+      "reach": "global",
+      "defaultRegion": null,
+      "expectedCurrencies": [
+        "EUR"
+      ],
+      "kindRoles": {
+        "active_median": "reference",
+        "active_listing": "buy_listing"
+      },
+      "kindLabels": {
+        "active_median": "eBay DE median (active)",
+        "active_listing": "eBay DE listing"
+      },
+      "caveat": "eBay DE prices are active FIXED-PRICE listings, not sold prices.",
+      "sellFeeRate": 0.13
+    },
+    {
+      "id": "ebay_es",
+      "kind": "live",
+      "label": "eBay ES",
+      "family": "ebay",
+      "familyLabel": "eBay",
+      "country": "ES",
+      "reach": "global",
+      "defaultRegion": null,
+      "expectedCurrencies": [
+        "EUR"
+      ],
+      "kindRoles": {
+        "active_median": "reference",
+        "active_listing": "buy_listing"
+      },
+      "kindLabels": {
+        "active_median": "eBay ES median (active)",
+        "active_listing": "eBay ES listing"
+      },
+      "caveat": "eBay ES prices are active FIXED-PRICE listings, not sold prices.",
+      "sellFeeRate": 0.13
+    },
+    {
+      "id": "ebay_fr",
+      "kind": "live",
+      "label": "eBay FR",
+      "family": "ebay",
+      "familyLabel": "eBay",
+      "country": "FR",
+      "reach": "global",
+      "defaultRegion": null,
+      "expectedCurrencies": [
+        "EUR"
+      ],
+      "kindRoles": {
+        "active_median": "reference",
+        "active_listing": "buy_listing"
+      },
+      "kindLabels": {
+        "active_median": "eBay FR median (active)",
+        "active_listing": "eBay FR listing"
+      },
+      "caveat": "eBay FR prices are active FIXED-PRICE listings, not sold prices.",
+      "sellFeeRate": 0.13
+    },
+    {
+      "id": "ebay_us",
+      "kind": "live",
+      "label": "eBay US",
+      "family": "ebay",
+      "familyLabel": "eBay",
+      "country": "US",
+      "reach": "global",
+      "defaultRegion": null,
+      "expectedCurrencies": [
+        "USD"
+      ],
+      "kindRoles": {
+        "active_median": "reference",
+        "active_listing": "buy_listing"
+      },
+      "kindLabels": {
+        "active_median": "eBay US median (active)",
+        "active_listing": "eBay US listing"
+      },
+      "caveat": "eBay US prices are active FIXED-PRICE listings, not sold prices.",
+      "sellFeeRate": 0.13
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+node_modules
+**/node_modules
+**/dist
+.pgdev
+.superpowers
+.git
+.github
+.claude
+docs
+*.md
+**/*.md
+.env
+.env.*
+!.env.example

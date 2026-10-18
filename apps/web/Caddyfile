@@ -1,0 +1,79 @@
+# The web container: serves the built PWA and proxies /api/ to the api service.
+#
+# Plain HTTP on :80 serves only /root.crt and redirects everything else to
+# HTTPS on the same host, so a password never travels in clear. HTTPS on :443
+# for PUBLIC_HOST:
+# for localhost, an IP or a bare name Caddy issues the certificate from its own
+# CA (a client that trusts /root.crt once can install the PWA); for a real
+# domain it gets a Let's Encrypt one by itself.
+
+{
+	# The container has no trust store to install the root into; clients do.
+	skip_install_trust
+	# A client connecting by IP sends no SNI; without a default Caddy has no
+	# certificate to pick and the handshake fails when PUBLIC_HOST is an IP.
+	default_sni {$PUBLIC_HOST:localhost}
+	# No HTTP/3: compose publishes 443 over TCP only, and Firefox follows the
+	# Alt-Svc advert to QUIC, where a certificate exception for the local CA
+	# does not apply, so every request after the page itself failed.
+	servers {
+		protocols h1 h2
+	}
+}
+
+# Password protection, on when APP_PASSWORD_HASH is set (the image's CMD
+# turns that into APP_AUTH=auth). Everything but /root.crt is behind it, so a
+# client can still fetch the certificate to trust before it can log in.
+(auth) {
+	@protected not path /root.crt
+	basic_auth @protected {
+		{$APP_USER:retro} {$APP_PASSWORD_HASH}
+	}
+}
+(noauth) {
+}
+
+(rootcrt) {
+	handle /root.crt {
+		root * /data/caddy/pki/authorities/local
+		header Content-Type application/x-x509-ca-cert
+		file_server
+	}
+}
+
+(app) {
+	import {$APP_AUTH:noauth}
+	header {
+		# the app is same-origin only: no frames, no third-party scripts, no
+		# connections but its own API; images come from IGDB's CDN
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https://images.igdb.com data:; connect-src 'self'; font-src 'self'; manifest-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+	handle /api/* {
+		reverse_proxy api:3001
+	}
+	import rootcrt
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}
+
+# Plain HTTP: the certificate, so a new client can trust it, and nothing else.
+http://:80 {
+	import rootcrt
+	# inside a handle, so the certificate's handle above wins for /root.crt
+	handle {
+		redir https://{host}{uri} 308
+	}
+}
+
+{$PUBLIC_HOST:localhost} {
+	header Strict-Transport-Security "max-age=31536000"
+	import app
+}

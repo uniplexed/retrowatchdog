@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": { "outDir": "dist", "rootDir": "." },
+  // `scripts` is in here so `pnpm typecheck` — the first command of every
+  // gate — actually looks at it. Without it a broken import under scripts/
+  // costs nothing at build time, passes every suite, and fails at RUNTIME for
+  // whoever runs the script months later. That blind spot is what Task 2 of
+  // the batch-2 plan was written around.
+  //
+  // It does NOT reach `dist/`: `build` runs tsconfig.build.json, which sets
+  // its own `include: ["src"]` and overrides this one. Verified by building
+  // and listing dist/ — no scripts/ directory is emitted.
+  "include": ["src", "test", "scripts"]
+}

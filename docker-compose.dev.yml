@@ -1,0 +1,15 @@
+# Development only: publishes the stores and the api on loopback so `pnpm dev`
+# on the host can reach them. Never part of an installation: the installer
+# downloads docker-compose.yml alone, and that file publishes nothing but the
+# web ports. Use:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d postgres redis
+services:
+  postgres:
+    ports:
+      - "127.0.0.1:5432:5432"
+  redis:
+    ports:
+      - "127.0.0.1:6379:6379"
+  api:
+    ports:
+      - "127.0.0.1:3001:3001"

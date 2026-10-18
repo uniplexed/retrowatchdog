@@ -1,0 +1,142 @@
+[
+  {
+    "sourceProductId": "v1|1001|0",
+    "title": "Super Mario World SNES PAL Boxed Complete",
+    "conditionText": "Pre-owned",
+    "url": "https://www.ebay.co.uk/itm/1001",
+    "prices": [
+      {
+        "kind": "active_listing",
+        "amount": 45,
+        "currency": "GBP"
+      }
+    ],
+    "available": true
+  },
+  {
+    "sourceProductId": "v1|1002|0",
+    "title": "Super Mario World SNES Cart Only PAL",
+    "conditionText": "Pre-owned",
+    "url": "https://www.ebay.co.uk/itm/1002",
+    "prices": [
+      {
+        "kind": "active_listing",
+        "amount": 22,
+        "currency": "GBP"
+      }
+    ],
+    "available": true
+  },
+  {
+    "sourceProductId": "v1|1003|0",
+    "title": "Super Mario World Super Nintendo PAL cartridge only tested",
+    "conditionText": "Pre-owned",
+    "url": "https://www.ebay.co.uk/itm/1003",
+    "prices": [
+      {
+        "kind": "active_listing",
+        "amount": 24,
+        "currency": "GBP"
+      }
+    ],
+    "available": true
+  },
+  {
+    "sourceProductId": "v1|1004|0",
+    "title": "Super Mario World SNES game cart",
+    "conditionText": "Pre-owned",
+    "url": "https://www.ebay.co.uk/itm/1004",
+    "prices": [
+      {
+        "kind": "active_listing",
+        "amount": 26,
+        "currency": "GBP"
+      }
+    ],
+    "available": true
+  },
+  {
+    "sourceProductId": "v1|1005|0",
+    "title": "Super Mario World Super Famicom JAP Japan import",
+    "conditionText": "Pre-owned",
+    "url": "https://www.ebay.co.uk/itm/1005",
+    "prices": [
+      {
+        "kind": "active_listing",
+        "amount": 15,
+        "currency": "GBP"
+      }
+    ],
+    "available": true
+  },
+  {
+    "sourceProductId": "v1|1006|0",
+    "title": "Super Mario World SNES PAL Brand New Sealed",
+    "conditionText": "New",
+    "url": "https://www.ebay.co.uk/itm/1006",
+    "prices": [
+      {
+        "kind": "active_listing",
+        "amount": 200,
+        "currency": "GBP"
+      }
+    ],
+    "available": true
+  },
+  {
+    "sourceProductId": "v1|1007|0",
+    "title": "Super Mario World SNES NTSC USA version boxed",
+    "conditionText": "Pre-owned",
+    "url": "https://www.ebay.co.uk/itm/1007",
+    "prices": [
+      {
+        "kind": "active_listing",
+        "amount": 30,
+        "currency": "GBP"
+      }
+    ],
+    "available": true
+  },
+  {
+    "sourceProductId": "v1|1008|0",
+    "title": "Super Mario World SNES",
+    "conditionText": "Pre-owned",
+    "url": "https://www.ebay.co.uk/itm/1008",
+    "prices": [
+      {
+        "kind": "active_listing",
+        "amount": 25,
+        "currency": "GBP"
+      }
+    ],
+    "available": true
+  },
+  {
+    "sourceProductId": "v1|1009|0",
+    "title": "Super Mario World SNES PAL",
+    "conditionText": "New",
+    "url": "https://www.ebay.co.uk/itm/1009",
+    "prices": [
+      {
+        "kind": "active_listing",
+        "amount": 190,
+        "currency": "GBP"
+      }
+    ],
+    "available": true
+  },
+  {
+    "sourceProductId": "v1|1010|0",
+    "title": "Super Mario World SNES Instruction Booklet / Manual",
+    "conditionText": "Pre-owned",
+    "url": "https://www.ebay.co.uk/itm/1010",
+    "prices": [
+      {
+        "kind": "active_listing",
+        "amount": 5,
+        "currency": "GBP"
+      }
+    ],
+    "available": true
+  }
+]

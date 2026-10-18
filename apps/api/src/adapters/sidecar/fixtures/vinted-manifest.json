@@ -1,0 +1,110 @@
+{
+  "protocol": 3,
+  "plugin": {
+    "name": "vinted",
+    "version": "1.0.0"
+  },
+  "requiredSecrets": [],
+  "sources": [
+    {
+      "id": "vinted_uk",
+      "kind": "live",
+      "label": "Vinted UK",
+      "family": "vinted",
+      "familyLabel": "Vinted",
+      "country": "GB",
+      "reach": "global",
+      "defaultRegion": null,
+      "expectedCurrencies": [
+        "GBP"
+      ],
+      "kindRoles": {
+        "active_listing": "buy_listing"
+      },
+      "kindLabels": {
+        "active_listing": "Vinted UK asking price"
+      },
+      "caveat": "Vinted UK is read by an unofficial community scraper: asking prices from private sellers, best-effort. Vinted's terms forbid scraping without its authorization: https://www.vinted.co.uk/terms_and_conditions"
+    },
+    {
+      "id": "vinted_fr",
+      "kind": "live",
+      "label": "Vinted France",
+      "family": "vinted",
+      "familyLabel": "Vinted",
+      "country": "FR",
+      "reach": "global",
+      "defaultRegion": null,
+      "expectedCurrencies": [
+        "EUR"
+      ],
+      "kindRoles": {
+        "active_listing": "buy_listing"
+      },
+      "kindLabels": {
+        "active_listing": "Vinted France asking price"
+      },
+      "caveat": "Vinted France is read by an unofficial community scraper: asking prices from private sellers, best-effort. Vinted's terms forbid scraping without its authorization: https://www.vinted.co.uk/terms_and_conditions"
+    },
+    {
+      "id": "vinted_de",
+      "kind": "live",
+      "label": "Vinted Deutschland",
+      "family": "vinted",
+      "familyLabel": "Vinted",
+      "country": "DE",
+      "reach": "global",
+      "defaultRegion": null,
+      "expectedCurrencies": [
+        "EUR"
+      ],
+      "kindRoles": {
+        "active_listing": "buy_listing"
+      },
+      "kindLabels": {
+        "active_listing": "Vinted Deutschland asking price"
+      },
+      "caveat": "Vinted Deutschland is read by an unofficial community scraper: asking prices from private sellers, best-effort. Vinted's terms forbid scraping without its authorization: https://www.vinted.co.uk/terms_and_conditions"
+    },
+    {
+      "id": "vinted_es",
+      "kind": "live",
+      "label": "Vinted Espa\u00f1a",
+      "family": "vinted",
+      "familyLabel": "Vinted",
+      "country": "ES",
+      "reach": "global",
+      "defaultRegion": null,
+      "expectedCurrencies": [
+        "EUR"
+      ],
+      "kindRoles": {
+        "active_listing": "buy_listing"
+      },
+      "kindLabels": {
+        "active_listing": "Vinted Espa\u00f1a asking price"
+      },
+      "caveat": "Vinted Espa\u00f1a is read by an unofficial community scraper: asking prices from private sellers, best-effort. Vinted's terms forbid scraping without its authorization: https://www.vinted.co.uk/terms_and_conditions"
+    },
+    {
+      "id": "vinted_ie",
+      "kind": "live",
+      "label": "Vinted Ireland",
+      "family": "vinted",
+      "familyLabel": "Vinted",
+      "country": "IE",
+      "reach": "global",
+      "defaultRegion": null,
+      "expectedCurrencies": [
+        "EUR"
+      ],
+      "kindRoles": {
+        "active_listing": "buy_listing"
+      },
+      "kindLabels": {
+        "active_listing": "Vinted Ireland asking price"
+      },
+      "caveat": "Vinted Ireland is read by an unofficial community scraper: asking prices from private sellers, best-effort. Vinted's terms forbid scraping without its authorization: https://www.vinted.co.uk/terms_and_conditions"
+    }
+  ]
+}

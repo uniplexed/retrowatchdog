@@ -1,0 +1,326 @@
+# Fully self-contained stack: `docker compose up -d --build` brings up
+# postgres, redis, api, worker and web, plus the plugins whose profiles are on —
+# no host-side Node/pnpm needed.
+# Everything (project, containers, volume, db/user) is named retrowatchdog.
+#
+# Dev loop still works against this same file: `docker compose up -d postgres
+# redis` starts only the infra (5432/6379 stay published for that), then run
+# the pnpm dev servers on the host. Don't run the full stack and the dev
+# servers at once — both want port 3001.
+name: retrowatchdog
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: retrowatchdog-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: retrowatchdog
+      POSTGRES_PASSWORD: retrowatchdog
+      POSTGRES_DB: retrowatchdog
+    # No published port: this file states the user and password in clear, and
+    # on a Docker Desktop host even a loopback-bound port is reachable from any
+    # container through the host gateway, the route back that would make the
+    # sidecar's network segmentation below decorative. Development publishes
+    # it through docker-compose.dev.yml.
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U retrowatchdog -d retrowatchdog"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: retrowatchdog-redis
+    restart: unless-stopped
+    # No published port, as for postgres above; here there is no password at all.
+    # deliberately no volume: queue state is disposable — the worker's boot
+    # catch-up recreates schedulers and re-enqueues anything missed
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - backend
+  # Source plugins. Each is a separate image, built from its own repository
+  # and enabled by a compose profile (COMPOSE_PROFILES in the root .env), so
+  # the stack starts without any of them and a missing image never blocks it.
+  # They are untrusted by design: no published port, no volume, the `sidecars`
+  # network only (no route to postgres or redis), none of the app's
+  # credentials. Pacing, breaking and size bounds are the app's
+  # (docs/sidecar-protocol.md). A plugin that holds a credential reads it from
+  # its own env file beside .env, which .gitignore already covers.
+  vinted-sidecar-plugin:
+    image: ${VINTED_SIDECAR_PLUGIN_IMAGE:-ghcr.io/uniplexed/retrowatchdog-vinted-sidecar-plugin:latest}
+    container_name: retrowatchdog-vinted-sidecar-plugin
+    restart: unless-stopped
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    profiles: [vinted]
+    environment:
+      # one process serves every Vinted site, one source each (vinted_uk,
+      # vinted_fr, vinted_de, vinted_es, vinted_ie); each market is switched
+      # on in Settings -> Markets. VINTED_SITES in .env.vinted narrows it.
+      # "Video games & consoles", the same id on every site (verified
+      # 2026-10-18): without it a title search also returns books and films
+      VINTED_CATALOG_IDS: "3002"
+    # Optional overrides; the file may not exist.
+    env_file:
+      - path: .env.vinted
+        required: false
+    # python:3.12-slim ships neither curl nor wget, so the check is python
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - sidecars
+
+  wallapop-sidecar-plugin:
+    image: ${WALLAPOP_SIDECAR_PLUGIN_IMAGE:-ghcr.io/uniplexed/retrowatchdog-wallapop-sidecar-plugin:latest}
+    container_name: retrowatchdog-wallapop-sidecar-plugin
+    restart: unless-stopped
+    # untrusted or internet-facing process: no capabilities, no privilege
+    # escalation, a read-only image with /tmp the only writable place
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    profiles: [wallapop]
+    # One process serves Spain, Italy and Portugal (wallapop_es, _it, _pt).
+    # .env.wallapop narrows the sites (WALLAPOP_SITES) and moves each country's
+    # search from its capital to your city (WALLAPOP_LOCATION_ES=lat,lon).
+    env_file:
+      - path: .env.wallapop
+        required: false
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - sidecars
+
+  ebay-plugin:
+    image: ${EBAY_PLUGIN_IMAGE:-ghcr.io/uniplexed/retrowatchdog-ebay-plugin:latest}
+    container_name: retrowatchdog-ebay-plugin
+    restart: unless-stopped
+    # untrusted or internet-facing process: no capabilities, no privilege
+    # escalation, a read-only image with /tmp the only writable place
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    profiles: [ebay]
+    # The eBay credentials; without the file /health reports configured: false
+    # and the container still starts.
+    env_file:
+      - path: .env.ebay
+        required: false
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8000/health').then(r=>{if(!r.ok)process.exit(1)})"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - sidecars
+
+  cex-plugin:
+    image: ${CEX_PLUGIN_IMAGE:-ghcr.io/uniplexed/retrowatchdog-cex-plugin:latest}
+    container_name: retrowatchdog-cex-plugin
+    restart: unless-stopped
+    # untrusted or internet-facing process: no capabilities, no privilege
+    # escalation, a read-only image with /tmp the only writable place
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    profiles: [cex]
+    # The Algolia pair CeX's site uses, plus optional category and cadence
+    # overrides; see the plugin's README.
+    env_file:
+      - path: .env.cex
+        required: false
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8000/health').then(r=>{if(!r.ok)process.exit(1)})"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - sidecars
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    image: ${API_IMAGE:-ghcr.io/uniplexed/retrowatchdog-api:latest}
+    container_name: retrowatchdog-api
+    restart: unless-stopped
+    # untrusted or internet-facing process: no capabilities, no privilege
+    # escalation, a read-only image with /tmp the only writable place
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    environment:
+      # service-name hosts; these override the host-oriented values in .env
+      DATABASE_URL: postgres://retrowatchdog:retrowatchdog@postgres:5432/retrowatchdog
+      REDIS_URL: redis://redis:6379
+      # Where the Vinted sidecar listens. Set here rather than in .env because
+      # it is a fact about this network, not a credential. It no longer wires a
+      # market: it SEEDS a pending plugin row, once per deployment, and only
+      # this container reads it (apps/api/src/plugins/seed.ts, called from
+      # apps/api/src/server.ts).
+      #
+      # There is still no depends_on, and must not be: a dead sidecar must
+      # never degrade to an api that will not boot. That rule now covers this
+      # deployment's PRIMARY source as well as a community one — a dead
+      # ebay-plugin below must never keep this container from booting either.
+      # What it DOES degrade to has changed, though — with no approved plugin
+      # there is no vinted_uk adapter at all, so a dead sidecar shows no
+      # source block anywhere and no error on a game view. The only evidence
+      # is the pending plugin's own last error in Settings -> Plugins.
+      VINTED_SIDECAR_PLUGIN_URL: http://vinted-sidecar-plugin:8000
+      # The other shipped plugins, offered the same way: once, pending.
+      CEX_PLUGIN_URL: http://cex-plugin:8000
+      EBAY_PLUGIN_URL: http://ebay-plugin:8000
+      WALLAPOP_SIDECAR_PLUGIN_URL: http://wallapop-sidecar-plugin:8000
+      # A plugin is untrusted code on the network it shares with the api: the
+      # api refuses every request from it (apps/api/src/security/requestGuard.ts).
+      API_DENY_SUBNETS: ${SIDECAR_SUBNET:-172.31.250.0/24}
+      # The names the app answers to; IPs, localhost and service names always do.
+      PUBLIC_HOST: ${PUBLIC_HOST:-localhost}
+    env_file:
+      # source keys (IGDB / eBay / PriceCharting, CeX overrides); optional —
+      # the app runs keyless with CeX only
+      - path: .env
+        required: false
+    # No published port: there is no authentication, so every caller who
+    # reached it could write anything. Clients reach the API through the web
+    # container's /api/ proxy; development publishes it through
+    # docker-compose.dev.yml.
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # /health is intentionally unprefixed (SPA-facing routes live under /api).
+    # Healthcheck lives here, not in the Dockerfile, because the worker shares
+    # the image and must not inherit an http check it can never pass.
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3001/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 30s
+    # the only services that span both: they hold the credentials AND call the
+    # sidecars, which is precisely why the sidecars must not span them
+    networks:
+      - backend
+      - sidecars
+
+  worker:
+    # same image as api (built once via the api service), different command
+    image: ${API_IMAGE:-ghcr.io/uniplexed/retrowatchdog-api:latest}
+    container_name: retrowatchdog-worker
+    restart: unless-stopped
+    # untrusted or internet-facing process: no capabilities, no privilege
+    # escalation, a read-only image with /tmp the only writable place
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    command: ["node", "apps/api/dist/worker/index.js"]
+    environment:
+      DATABASE_URL: postgres://retrowatchdog:retrowatchdog@postgres:5432/retrowatchdog
+      REDIS_URL: redis://redis:6379
+      # Where the watchlist alerts read the watchlist from — the api's own
+      # GET /api/watchlist, so an alert is exactly what the screen shows
+      # (apps/api/src/worker/alerts.ts). The alerts themselves are OFF until
+      # NTFY_TOPIC is set in the root .env; this address is harmless without it.
+      API_INTERNAL_URL: http://api:3001
+      # No VINTED_SIDECAR_PLUGIN_URL. Nothing this process runs reads it: it seeds a
+      # plugin row, and that seed is called from apps/api/src/server.ts, which
+      # is the api's entrypoint and not this container's command.
+    env_file:
+      - path: .env
+        required: false
+    depends_on:
+      # api healthy == it is listening == its boot migrations already ran, so
+      # the worker never races DDL (postgres-healthy is implied transitively)
+      api:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # `sidecars` STAYS, and losing the variable above is no argument against
+    # it: this process polls every imported plugin's /health and /manifest
+    # (worker/pluginHealth.ts) and refreshes tracked prices through their
+    # adapters, at base URLs it reads from the database rather than from the
+    # environment.
+    networks:
+      - backend
+      - sidecars
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    image: ${WEB_IMAGE:-ghcr.io/uniplexed/retrowatchdog-web:latest}
+    container_name: retrowatchdog-web
+    restart: unless-stopped
+    # The app's front door, published on every interface. There is no
+    # authentication, so anyone who can reach these ports can reach every
+    # write endpoint behind /api/: put it where only its users can reach it.
+    # PUBLIC_HOST (root .env) is the name HTTPS answers to; see the Caddyfile.
+    environment:
+      PUBLIC_HOST: ${PUBLIC_HOST:-localhost}
+      # Password protection (root .env): on when the hash is set.
+      APP_USER: ${APP_USER:-retro}
+      APP_PASSWORD_HASH: ${APP_PASSWORD_HASH:-}
+    volumes:
+      # Caddy's own CA and certificates. Without it every recreate mints a new
+      # root and every client that trusted the old one has to trust it again.
+      - caddy_data:/data
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      # started (not healthy) is enough: a not-yet-ready api degrades to
+      # per-request 502s
+      api:
+        condition: service_started
+    networks:
+      - backend
+
+# Two networks, because one of the services here is community-written code the
+# app treats as untrusted. `backend` carries the app and its data; `sidecars`
+# carries the app and the sidecars. Nothing joins both except the api and the
+# worker, so a sidecar has no name and no route for postgres or redis — which
+# is what turns "it gets no database access" from a description of what we hand
+# it into a fact about what it can reach. Adding a service means choosing its
+# network deliberately (pinned by apps/api/test/deploy/composeIsolation.test.ts):
+# omitting the key everywhere would put everything back on one default bridge.
+networks:
+  backend:
+  sidecars:
+    # fixed so the api can refuse it by address; change SIDECAR_SUBNET in .env
+    # if it collides with another network on the host
+    ipam:
+      config:
+        - subnet: ${SIDECAR_SUBNET:-172.31.250.0/24}
+
+volumes:
+  pgdata:
+    name: retrowatchdog_pgdata
+  caddy_data:
+    name: retrowatchdog_caddy

@@ -1,0 +1,94 @@
+{
+  "nes": [
+    "NES",
+    "Nintendo Entertainment System",
+    "Famicom"
+  ],
+  "snes": [
+    "SNES",
+    "Super Nintendo",
+    "Super Famicom"
+  ],
+  "n64": [
+    "N64",
+    "Nintendo 64"
+  ],
+  "gb": [
+    "Game Boy",
+    "Gameboy"
+  ],
+  "gbc": [
+    "Game Boy Color",
+    "Gameboy Color",
+    "Game Boy Colour",
+    "Gameboy Colour",
+    "GBC"
+  ],
+  "gba": [
+    "GBA",
+    "Game Boy Advance",
+    "Gameboy Advance"
+  ],
+  "megadrive": [
+    "Mega Drive",
+    "Megadrive",
+    "Genesis"
+  ],
+  "master_system": [
+    "Master System"
+  ],
+  "game_gear": [
+    "Game Gear",
+    "GameGear"
+  ],
+  "saturn": [
+    "Saturn"
+  ],
+  "dreamcast": [
+    "Dreamcast"
+  ],
+  "ps1": [
+    "PS1",
+    "PlayStation 1",
+    "PSX"
+  ],
+  "ps2": [
+    "PS2",
+    "PlayStation 2"
+  ],
+  "gamecube": [
+    "GameCube",
+    "Game Cube"
+  ],
+  "neogeo_aes": [
+    "Neo Geo AES",
+    "NeoGeo AES"
+  ],
+  "neogeo_pocket_color": [
+    "Neo Geo Pocket Color",
+    "Neo Geo Pocket Colour",
+    "NeoGeo Pocket Color",
+    "NeoGeo Pocket Colour",
+    "NGPC"
+  ],
+  "ds": [
+    "Nintendo DS",
+    "DS"
+  ],
+  "3ds": [
+    "3DS",
+    "Nintendo 3DS"
+  ],
+  "virtual_boy": [
+    "Virtual Boy",
+    "VirtualBoy"
+  ],
+  "game_and_watch": [
+    "Game & Watch",
+    "Game and Watch",
+    "Game&Watch"
+  ],
+  "pc": [
+    "PC"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "retrowatchdog",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:api": "pnpm --filter @retrowatchdog/api dev",
+    "dev:web": "pnpm --filter @retrowatchdog/web dev",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck"
+  }
+}

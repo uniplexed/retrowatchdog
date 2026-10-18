@@ -1,0 +1,1 @@
+ALTER TABLE "plugins" ADD COLUMN "adopted_at" timestamp with time zone;

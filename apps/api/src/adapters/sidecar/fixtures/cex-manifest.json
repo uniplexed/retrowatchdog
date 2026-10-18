@@ -1,0 +1,100 @@
+{
+  "protocol": 3,
+  "plugin": {
+    "name": "cex",
+    "version": "1.0.0"
+  },
+  "requiredSecrets": [
+    "CEX_ALGOLIA_APP_ID",
+    "CEX_ALGOLIA_API_KEY"
+  ],
+  "sources": [
+    {
+      "id": "cex",
+      "kind": "sync",
+      "label": "CeX UK",
+      "family": "cex",
+      "familyLabel": "CeX",
+      "country": "GB",
+      "reach": "local",
+      "defaultRegion": "PAL",
+      "expectedCurrencies": [
+        "GBP"
+      ],
+      "kindRoles": {
+        "sell": "buy_store",
+        "cash": "bid",
+        "voucher": "bid"
+      },
+      "kindLabels": {
+        "sell": "CeX UK sells for",
+        "cash": "CeX UK pays cash",
+        "voucher": "CeX UK pays voucher"
+      },
+      "caveat": "CeX UK is read through CeX's unofficial search index, best-effort; it may stop working at any time.",
+      "productUrl": "https://uk.webuy.com/product-detail?id={id}",
+      "schedule": {
+        "catalogCron": "0 3 * * 1",
+        "trackedRefreshHours": 24
+      }
+    },
+    {
+      "id": "cex_es",
+      "kind": "sync",
+      "label": "CeX ES",
+      "family": "cex",
+      "familyLabel": "CeX",
+      "country": "ES",
+      "reach": "local",
+      "defaultRegion": "PAL",
+      "expectedCurrencies": [
+        "EUR"
+      ],
+      "kindRoles": {
+        "sell": "buy_store",
+        "cash": "bid",
+        "voucher": "bid"
+      },
+      "kindLabels": {
+        "sell": "CeX ES sells for",
+        "cash": "CeX ES pays cash",
+        "voucher": "CeX ES pays voucher"
+      },
+      "caveat": "CeX ES is read through CeX's unofficial search index, best-effort; it may stop working at any time.",
+      "productUrl": "https://es.webuy.com/product-detail?id={id}",
+      "schedule": {
+        "catalogCron": "0 3 * * 1",
+        "trackedRefreshHours": 24
+      }
+    },
+    {
+      "id": "cex_ie",
+      "kind": "sync",
+      "label": "CeX IE",
+      "family": "cex",
+      "familyLabel": "CeX",
+      "country": "IE",
+      "reach": "local",
+      "defaultRegion": "PAL",
+      "expectedCurrencies": [
+        "EUR"
+      ],
+      "kindRoles": {
+        "sell": "buy_store",
+        "cash": "bid",
+        "voucher": "bid"
+      },
+      "kindLabels": {
+        "sell": "CeX IE sells for",
+        "cash": "CeX IE pays cash",
+        "voucher": "CeX IE pays voucher"
+      },
+      "caveat": "CeX IE is read through CeX's unofficial search index, best-effort; it may stop working at any time.",
+      "productUrl": "https://ie.webuy.com/product-detail?id={id}",
+      "schedule": {
+        "catalogCron": "0 3 * * 1",
+        "trackedRefreshHours": 24
+      }
+    }
+  ]
+}

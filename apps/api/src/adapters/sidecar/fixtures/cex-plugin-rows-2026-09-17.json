@@ -1,0 +1,62 @@
+[
+  {
+    "sourceProductId": "045496830144C",
+    "title": "Super Mario Kart, Unboxed",
+    "categoryText": "Super NES Software",
+    "prices": {
+      "sell": 15,
+      "cash": 6,
+      "voucher": 9
+    },
+    "currency": "GBP",
+    "available": true
+  },
+  {
+    "sourceProductId": "045496330347C",
+    "title": "Super Mario All Stars, Unboxed",
+    "categoryText": "Super NES Software",
+    "prices": {
+      "sell": 8,
+      "cash": 3,
+      "voucher": 5
+    },
+    "currency": "GBP",
+    "available": true
+  },
+  {
+    "sourceProductId": "3296580830602C",
+    "title": "Super Mario World, Unboxed",
+    "categoryText": "Super NES Software",
+    "prices": {
+      "sell": 10,
+      "cash": 4,
+      "voucher": 6
+    },
+    "currency": "GBP",
+    "available": true
+  },
+  {
+    "sourceProductId": "045496830069C",
+    "title": "Starwing, Unboxed",
+    "categoryText": "Super NES Software",
+    "prices": {
+      "sell": 8,
+      "cash": 2,
+      "voucher": 3
+    },
+    "currency": "GBP",
+    "available": true
+  },
+  {
+    "sourceProductId": "045496830359C",
+    "title": "Donkey Kong Country, Unboxed",
+    "categoryText": "Super NES Software",
+    "prices": {
+      "sell": 18,
+      "cash": 4,
+      "voucher": 7
+    },
+    "currency": "GBP",
+    "available": true
+  }
+]

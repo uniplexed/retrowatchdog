@@ -1,0 +1,10 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+allowBuilds:
+  esbuild: true
+  msgpackr-extract: false
+# security floors for transitive dependencies (pnpm audit, 2026-10-18)
+overrides:
+  "fast-uri@>=3.0.0 <3.1.8": "3.1.8"
+  "fast-uri@>=4.0.0 <4.1.5": "4.1.5"
