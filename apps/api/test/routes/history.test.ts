@@ -97,9 +97,9 @@ describe("GET /api/games/:id/history", () => {
     await app.close();
   });
 
-  it("refuses a window outside 1..365 rather than clamping it", async () => {
+  it("refuses a window outside 1..730 (two years) rather than clamping it", async () => {
     const app = await buildApp({ db, igdb: igdbStub, registry: [] });
-    for (const days of ["0", "366", "-5", "1.5", "many"]) {
+    for (const days of ["0", "731", "-5", "1.5", "many"]) {
       const res = await app.inject({
         method: "GET",
         url: `/api/games/${gameId}/history?region=PAL&condition=cib&days=${days}`,
@@ -248,5 +248,39 @@ describe("GET /api/games/:id/history", () => {
     expect(res.statusCode).toBe(200);
     expect(res.json().series).toEqual([]);
     await app.close();
+  });
+});
+
+describe("GET /api/games/:id/history with an explicit period", () => {
+  let db: Db;
+  let pool: pg.Pool;
+  let truncateAll: () => Promise<void>;
+  beforeAll(async () => {
+    ({ db, pool, truncateAll } = await setupTestDb());
+  });
+  afterAll(async () => await pool.end());
+
+  it("serves from..to inclusive and nothing after to, so every chart can share one window", async () => {
+    await truncateAll();
+    await seedCexPlugin(db);
+    const [g] = await db.insert(games).values({ igdbId: 1, title: "Zelda", platform: "n64" }).returning({ id: games.id });
+    const app = await buildApp({ db, igdb: igdbStub, registry: [] });
+    const at = (day: string, usd: string) => ({
+      gameId: g.id, source: "cex", region: "PAL", condition: "cib", kind: "sell",
+      priceUsd: usd, priceOriginal: usd, currencyOriginal: "USD", available: true, fetchedAt: new Date(`${day}T12:00:00Z`),
+    });
+    const day = (n: number): string => new Date(Date.now() - n * 86_400_000).toISOString().slice(0, 10);
+    await db.insert(pricePoints).values([at(day(20), "10"), at(day(10), "20"), at(day(2), "30")]);
+    const res = await app.inject({ method: "GET", url: `/api/games/${g.id}/history?region=PAL&condition=cib&from=${day(15)}&to=${day(5)}` });
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect([body.from, body.to, body.days]).toEqual([day(15), day(5), 11]);
+    expect(body.series[0].points.map((p: { usd: number }) => p.usd)).toEqual([20]);
+  });
+
+  it("refuses a from without a to", async () => {
+    const app = await buildApp({ db, igdb: igdbStub, registry: [] });
+    const res = await app.inject({ method: "GET", url: `/api/games/1/history?region=PAL&condition=cib&from=2026-01-01` });
+    expect(res.statusCode).toBe(400);
   });
 });

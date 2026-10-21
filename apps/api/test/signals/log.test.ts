@@ -190,4 +190,20 @@ describe.skipIf(ctx === null)("signal_log evaluation", () => {
     const total = (await reliabilityRows(ctx!.db)).find((r) => r.type === "NEW_LOW" && r.source === null)!;
     expect(total).toMatchObject({ evaluated: 12, beaten: 1, unknown: 11, heldPct: null });
   });
+
+  it("reliability rows for a period count only the signals first seen inside it", async () => {
+    const seen = (key: string, day: string) =>
+      ctx!.db.insert(signalLog).values({
+        key, gameId, type: "UNDERPRICED", source: "ebay_uk", region: "PAL", condition: "cib",
+        confidence: "high", firstSeenAt: new Date(`${day}T12:00:00Z`), lastSeenAt: new Date(`${day}T12:00:00Z`),
+        evaluatedAt: now, outcome: "held",
+      });
+    await seen("before", "2026-08-31");
+    await seen("inside-1", "2026-09-01");
+    await seen("inside-2", "2026-09-30");
+    await seen("after", "2026-10-01");
+    const total = (await reliabilityRows(ctx!.db, { from: "2026-09-01", to: "2026-09-30" })).find((r) => r.source === null)!;
+    expect(total.logged).toBe(2);
+    expect((await reliabilityRows(ctx!.db)).find((r) => r.source === null)!.logged).toBe(4);
+  });
 });

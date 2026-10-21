@@ -7,6 +7,7 @@ import { enabledSourceIds } from "../settings/markets.js";
 import { loadSignalConfig } from "../settings/signals.js";
 import { loadSeries, sliceFor, type DayReading } from "../insights/series.js";
 import { cachedFor } from "./insights.js";
+import { parseWindow } from "../lib/window.js";
 
 const DAY_MS = 86_400_000;
 const daysSchema = z.coerce.number().int().min(1).max(365).optional();
@@ -32,13 +33,16 @@ export async function rowHistoryRoutes(app: FastifyInstance): Promise<void> {
   });
 
   app.get("/api/watchlist/history", async (req, reply) => {
-    const days = await parseDays((req.query as { days?: unknown }).days);
-    if (days === null) return reply.code(400).send({ error: "days must be 1..365" });
+    const window = parseWindow(req.query as Record<string, unknown>, (await loadSignalConfig(app.deps.db)).historyDays);
+    if (!window.ok) return reply.code(400).send({ error: window.reason });
+    const { from, to, days } = window;
+    // the series loader reads back from today, so it is asked for everything since `from`
+    const sinceFrom = Math.round((Date.now() - new Date(`${from}T00:00:00.000Z`).getTime()) / DAY_MS) + 1;
     const rows = await watches();
     const byDay = new Map<string, { totalUsd: number; covered: number }>();
-    for (const rs of (await readings(rows, days)).values()) {
+    for (const rs of (await readings(rows, sinceFrom)).values()) {
       for (const r of rs) {
-        if (r.cheapestUsd === null) continue;
+        if (r.cheapestUsd === null || r.day < from || r.day > to) continue;
         const cell = byDay.get(r.day) ?? { totalUsd: 0, covered: 0 };
         cell.totalUsd = Math.round((cell.totalUsd + r.cheapestUsd) * 100) / 100;
         cell.covered += 1;
@@ -47,8 +51,8 @@ export async function rowHistoryRoutes(app: FastifyInstance): Promise<void> {
     }
     const body: WatchlistHistoryResponse = {
       days,
-      from: new Date(Date.now() - (days - 1) * DAY_MS).toISOString().slice(0, 10),
-      to: new Date().toISOString().slice(0, 10),
+      from,
+      to,
       points: [...byDay].sort(([a], [b]) => a.localeCompare(b)).map(([day, c]) => ({ day, ...c, of: rows.length })),
     };
     return body;

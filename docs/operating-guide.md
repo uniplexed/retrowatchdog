@@ -27,8 +27,8 @@ anywhere except a text field.
 The desktop opens on the dashboard. It reads the same endpoints as the pages
 it summarises, so it can never disagree with them:
 
-- four figures: the collection's value (with its change over 30 days, once
-  the value history reaches that far back), paid, realized, and how many
+- four figures: the collection's value (with its change over the chosen
+  period, first recorded day against the last), paid, realized, and how many
   watches have a high-confidence signal;
 - **Recommended actions**: up to ten high-confidence recommendations (sell,
   buy, target changes; see "Recommendations"), then today's good prices — every
@@ -38,9 +38,27 @@ it summarises, so it can never disagree with them:
 - **Needs you**: plugins waiting for a review, copies whose match needs a
   check, and exchange rates that could not be fetched, each opening the
   section that fixes it;
-- the collection's value history over 90 days.
+- the collection's value history over the chosen period.
 
 A block whose request fails says so on its own; the rest still render.
+
+### The period
+
+Every history in the app is drawn over one shared period: 7 days, 30 days,
+90 days (the default), 1 year, All (two years, the most the API serves) or a
+custom pair of dates. The control sits on the dashboard, Insights, the
+watchlist, the collection and each game's price history; changing it in one
+place moves them all, and it is remembered in this browser. Each chart's
+horizontal axis spans exactly that period, so a source that started later
+shows its gap instead of a stretched line, and a missing day breaks the line.
+The barks (signals) reliability table counts only the barks first seen inside
+the period. Recommendations keep their own windows (Settings → Barks
+(Signals)): they say what to do today.
+
+The charts are ECharts: drag across one, or use the slider under it, to
+zoom; the cursor reads every line on that day; min, max and the average are
+marked; the icon in the corner saves the chart as a PNG. The history
+endpoints take `from` and `to` (YYYY-MM-DD, inclusive) or `days`, up to 730.
 
 ### Settings sections
 

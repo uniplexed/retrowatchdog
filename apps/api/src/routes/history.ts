@@ -1,42 +1,43 @@
 import type { FastifyInstance } from "fastify";
-import { and, eq, gte, inArray } from "drizzle-orm";
+import { and, eq, gte, inArray, lte } from "drizzle-orm";
 import { z } from "zod";
 import type { Condition, HistoryResponse, PriceKind, Region, SourceId } from "@retrowatchdog/shared";
 import { CONDITIONS, REGIONS } from "@retrowatchdog/shared";
 import { games, pricePoints } from "../db/schema.js";
-import { buildHistorySeries, dayOf, type HistoryRow } from "../pricing/history.js";
+import { buildHistorySeries, type HistoryRow } from "../pricing/history.js";
 import { loadEnabledSources } from "../settings/markets.js";
+import { parseWindow } from "../lib/window.js";
 
 const paramsSchema = z.object({ id: z.coerce.number().int().positive() });
 
 /**
  * `region` and `condition` are required and concrete: a history line mixing PAL
- * with NTSC-J is the dimension confusion this app exists to avoid. `days` out of
- * range is refused, not clamped.
+ * with NTSC-J is the dimension confusion this app exists to avoid. The window
+ * is `days`, or `from` and `to` (lib/window.ts); out of range is refused.
  */
 const querySchema = z.object({
   region: z.enum(REGIONS),
   condition: z.enum(CONDITIONS),
-  days: z.coerce.number().int().min(1).max(365).default(30),
 });
 
 export async function historyRoutes(app: FastifyInstance): Promise<void> {
   app.get("/api/games/:id/history", async (req, reply) => {
     const params = paramsSchema.safeParse(req.params);
     const query = querySchema.safeParse(req.query);
-    if (!params.success || !query.success) {
-      return reply.code(400).send({ error: "invalid params" });
+    const window = parseWindow(req.query as Record<string, unknown>, 30);
+    if (!params.success || !query.success || !window.ok) {
+      return reply.code(400).send({ error: window.ok ? "invalid params" : window.reason });
     }
     // Read per request: `sources` is replaced when a plugin is approved or removed.
     const { db, sources: registeredSources } = app.deps;
     const [game] = await db.select({ id: games.id }).from(games).where(eq(games.id, params.data.id));
     if (!game) return reply.code(404).send({ error: "game not found" });
 
-    const { region, condition, days } = query.data;
-    // The window is whole UTC days, inclusive of today: days=1 is today only.
-    const to = new Date();
-    const from = new Date(to.getTime() - (days - 1) * 86_400_000);
-    const fromMidnight = new Date(`${dayOf(from)}T00:00:00.000Z`);
+    const { region, condition } = query.data;
+    const { days } = window;
+    // whole UTC days, both edges inclusive
+    const fromMidnight = new Date(`${window.from}T00:00:00.000Z`);
+    const toEnd = new Date(`${window.to}T23:59:59.999Z`);
 
     // A market turned off in Settings must not surface here either.
     const enabledSources = [...(await loadEnabledSources(db))];
@@ -46,8 +47,8 @@ export async function historyRoutes(app: FastifyInstance): Promise<void> {
         region,
         condition,
         days,
-        from: dayOf(from),
-        to: dayOf(to),
+        from: window.from,
+        to: window.to,
         series: [],
       };
       return body;
@@ -74,6 +75,7 @@ export async function historyRoutes(app: FastifyInstance): Promise<void> {
           eq(pricePoints.region, region),
           eq(pricePoints.condition, condition),
           gte(pricePoints.fetchedAt, fromMidnight),
+          lte(pricePoints.fetchedAt, toEnd),
           inArray(pricePoints.source, enabledSources),
         ),
       );
@@ -96,8 +98,8 @@ export async function historyRoutes(app: FastifyInstance): Promise<void> {
       region,
       condition,
       days,
-      from: dayOf(from),
-      to: dayOf(to),
+      from: window.from,
+      to: window.to,
       series: buildHistorySeries(history, registeredSources.byId),
     };
     return body;

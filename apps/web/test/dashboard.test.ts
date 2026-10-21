@@ -37,9 +37,10 @@ describe("actOnToday", () => {
 
 describe("valueDelta", () => {
   const p = (day: string, estimatedUsd: number) => ({ day, estimatedUsd, paidUsd: 0 });
-  it("needs a point at least 30 days older than the last", () => {
-    expect(valueDelta([p("2026-10-01", 10), p("2026-10-17", 20)])).toBeNull();
-    expect(valueDelta([p("2026-09-10", 50), p("2026-09-17", 60), p("2026-10-17", 75)])).toBe(15);
+  it("is the change from the period's first point to its last, and needs two of them", () => {
+    expect(valueDelta([p("2026-10-01", 10), p("2026-10-17", 20)])).toBe(10);
+    expect(valueDelta([p("2026-09-10", 50), p("2026-09-17", 60), p("2026-10-17", 75)])).toBe(25);
+    expect(valueDelta([p("2026-10-17", 75)])).toBeNull();
     expect(valueDelta([])).toBeNull();
   });
 });

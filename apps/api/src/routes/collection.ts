@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
-import { and, asc, eq, gte, inArray } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, lte } from "drizzle-orm";
 import { z } from "zod";
+import { parseWindow } from "../lib/window.js";
 import type { AcquiredSource, Authenticity, CollectionHistoryResponse, CollectionResponse, Condition, CopyStatus, GameSummary, ItemGrade, MatchBasis, OwnedCopyDto, Platform, PricePointDto, Region, SourceId, SupportedCurrency, ValuationBasis, ValuationMarkets, ValueBasis, WorkingState } from "@retrowatchdog/shared";
 import { ACQUIRED_SOURCES, CONDITIONS, COUNTRY_CODES, DEFAULT_VALUATION_MARKETS, SUPPORTED_CURRENCIES, VALUATION_BASES, realizedUsd, returnedUsd, valuesCopies } from "@retrowatchdog/shared";
 import type { Db } from "../db/index.js";
@@ -653,15 +654,12 @@ export async function collectionRoutes(app: FastifyInstance): Promise<void> {
   });
 
   app.get("/api/collection/history", async (req, reply) => {
-    const query = valuationQuerySchema
-      .extend({ days: z.coerce.number().int().min(1).max(730).default(90) })
-      .safeParse(req.query);
-    if (!query.success) return reply.code(400).send({ error: "invalid params" });
-    const { valuation, country, includeForeign, days } = query.data;
+    const query = valuationQuerySchema.safeParse(req.query);
+    const window = parseWindow(req.query as Record<string, unknown>, 90);
+    if (!query.success || !window.ok) return reply.code(400).send({ error: window.ok ? "invalid params" : window.reason });
+    const { valuation, country, includeForeign } = query.data;
+    const { from, to, days } = window;
     const { db } = app.deps;
-    // whole UTC days, inclusive of today, as the price history does
-    const to = new Date().toISOString().slice(0, 10);
-    const from = new Date(Date.now() - (days - 1) * 86_400_000).toISOString().slice(0, 10);
     const rows = await db
       .select()
       .from(collectionValueDaily)
@@ -671,6 +669,7 @@ export async function collectionRoutes(app: FastifyInstance): Promise<void> {
           eq(collectionValueDaily.country, country),
           eq(collectionValueDaily.includeForeign, includeForeign),
           gte(collectionValueDaily.day, from),
+          lte(collectionValueDaily.day, to),
         ),
       )
       .orderBy(asc(collectionValueDaily.day));

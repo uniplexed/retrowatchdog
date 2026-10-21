@@ -58,7 +58,7 @@ describe("InsightsScreen", () => {
     expect(screen.getByText(/held means the price was not beaten/)).toHaveTextContent(
       "eBay and Vinted prices are asking prices, not sales: held means the price was not beaten, not that you could have bought at it.",
     );
-    expect(screen.getByText(/Measured since/)).toBeInTheDocument();
+    expect(screen.getByText(/measured since/)).toBeInTheDocument();
   });
 
   it("each signal type has a readable name and a hover description with an example", async () => {

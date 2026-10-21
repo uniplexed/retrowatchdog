@@ -4,22 +4,24 @@ import { getWatchlistHistory } from "../api/client.js";
 import { formatMoney } from "../lib/money.js";
 import { HistoryChart } from "./HistoryChart.js";
 import { InfoTip } from "../ui/InfoTip.js";
+import { resolvePeriod, usePeriod } from "../lib/period.js";
 
 /** The summed cheapest price of every watch per day, with how many watches had one. Fetched only when opened. */
-export function WatchlistHistory({ days = 90, defaultOpen = false }: { days?: number; defaultOpen?: boolean }) {
+export function WatchlistHistory({ defaultOpen = false }: { defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
   const [data, setData] = useState<WatchlistHistoryResponse | "error" | null>(null);
+  const { from, to } = resolvePeriod(usePeriod());
 
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
-    getWatchlistHistory(days)
+    getWatchlistHistory({ from, to })
       .then((d) => !cancelled && setData(d))
       .catch(() => !cancelled && setData("error"));
     return () => {
       cancelled = true;
     };
-  }, [open, days]);
+  }, [open, from, to]);
 
   const last = data !== null && data !== "error" ? data.points.at(-1) : undefined;
   return (

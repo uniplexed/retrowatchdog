@@ -1,6 +1,8 @@
 import { beforeEach } from "vitest";
 import "@testing-library/jest-dom/vitest";
 import { setSourcesForTests } from "../src/lib/sources.js";
+import { resetPeriodForTests } from "../src/lib/period.js";
+import { resetViewPrefsForTests } from "../src/lib/viewPrefs.js";
 import { SOURCES_FIXTURE } from "./fixtures/sources.js";
 
 // Every screen reads the source registry from the store (src/lib/sources.ts),
@@ -11,4 +13,13 @@ import { SOURCES_FIXTURE } from "./fixtures/sources.js";
 // own hooks, so a file that resets the store afterwards still wins.
 beforeEach(() => {
   setSourcesForTests(SOURCES_FIXTURE);
+  // the shared chart period and view preferences live in module state and
+  // localStorage; every test starts from the defaults
+  try {
+    window.localStorage.removeItem("period");
+  } catch {
+    // no storage in this environment
+  }
+  resetPeriodForTests();
+  resetViewPrefsForTests();
 });

@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { ACTION_ORDER, PLATFORMS, type GameSummary, type InsightsResponse, type Platform, type Recommendation, type ReliabilityRow } from "@retrowatchdog/shared";
 import { ListControls, type ControlGroupDef } from "../components/ListControls.js";
 import { descNullsLast, loadStoredControls, saveStoredControls } from "../lib/listControls.js";
-import { getInsights } from "../api/client.js";
+import { getInsights, getReliability } from "../api/client.js";
+import { PeriodControl } from "../components/PeriodControl.js";
+import { resolvePeriod, usePeriod } from "../lib/period.js";
 import { CollectionValueHistory } from "../components/CollectionValueHistory.js";
 import { RecommendationRow } from "../components/RecommendationRow.js";
 import { WatchlistHistory } from "../components/WatchlistHistory.js";
@@ -122,6 +124,18 @@ export function InsightsScreen({
   useEffect(() => {
     getInsights().then(setData, () => setData("error"));
   }, []);
+  const { from, to } = resolvePeriod(usePeriod());
+  const [reliability, setReliability] = useState<InsightsResponse["reliability"] | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    getReliability({ from, to }).then(
+      (r) => !cancelled && setReliability(r.reliability),
+      () => !cancelled && setReliability(null),
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [from, to]);
 
   if (data === null || data === "error") {
     return <p className="source-note">{data === null ? "Loading…" : "Could not load insights."}</p>;
@@ -170,10 +184,13 @@ export function InsightsScreen({
       onChange: (v) => update({ confidence: v }),
     },
   ];
-  const aggregate = data.reliability.filter((r) => r.source === null);
-  const bySource = data.reliability.filter((r) => r.source !== null);
+  // the period's table once it arrives; the all-time one meanwhile
+  const shown = reliability ?? data.reliability;
+  const aggregate = shown.filter((r) => r.source === null);
+  const bySource = shown.filter((r) => r.source !== null);
   return (
     <div className="insights">
+      <PeriodControl />
       <ListControls groups={controlGroups} onClear={() => update(DEFAULT_INSIGHTS_CONTROLS)} />
       {recs.length === 0 && <p className="source-note">Nothing to do right now.</p>}
       {ACTION_ORDER.map((action) => {
@@ -193,7 +210,9 @@ export function InsightsScreen({
           <p className="source-note">Barks (signals) are being logged; the first are judged 14 days after they appear.</p>
         ) : (
           <>
-            <p className="source-note">Measured since {new Date(data.measuredSince).toLocaleDateString()}</p>
+            <p className="source-note">
+              Barks (signals) first seen from {from} to {to}; measured since {new Date(data.measuredSince).toLocaleDateString()}
+            </p>
             <ReliabilityTable rows={aggregate} />
             {bySource.length > 0 && (
               <Fold summary="By source">
@@ -209,7 +228,7 @@ export function InsightsScreen({
           <WatchlistHistory defaultOpen />
         </Panel>
         <Panel>
-          <CollectionValueHistory basis={basis} markets={markets} days={90} defaultOpen />
+          <CollectionValueHistory basis={basis} markets={markets} defaultOpen />
         </Panel>
       </div>
     </div>

@@ -76,23 +76,23 @@ export function getPrices(
 export function getCollectionHistory(
   basis: ValuationBasis,
   markets: ValuationMarkets,
-  days: number,
+  window: { from: string; to: string },
 ): Promise<CollectionHistoryResponse> {
   const params = new URLSearchParams({
     valuation: basis,
     country: markets.country,
     includeForeign: String(markets.includeForeign),
-    days: String(days),
+    from: window.from,
+    to: window.to,
   });
   return getJson(`/api/collection/history?${params}`);
 }
 
 export function getPriceHistory(
   gameId: number,
-  opts: { region: string; condition: string; days?: number },
+  opts: { region: string; condition: string; from: string; to: string },
 ): Promise<HistoryResponse> {
-  const params = new URLSearchParams({ region: opts.region, condition: opts.condition });
-  if (opts.days !== undefined) params.set("days", String(opts.days));
+  const params = new URLSearchParams({ region: opts.region, condition: opts.condition, from: opts.from, to: opts.to });
   return getJson(`/api/games/${gameId}/history?${params}`);
 }
 
@@ -352,8 +352,13 @@ export function getSuggestedThresholds(): Promise<SuggestedThresholdsResponse> {
   return getJson("/api/settings/signals/suggested");
 }
 
-export function getWatchlistHistory(days?: number): Promise<WatchlistHistoryResponse> {
-  return getJson(days === undefined ? "/api/watchlist/history" : `/api/watchlist/history?days=${days}`);
+export function getWatchlistHistory(window: { from: string; to: string }): Promise<WatchlistHistoryResponse> {
+  return getJson(`/api/watchlist/history?${new URLSearchParams(window)}`);
+}
+
+/** the reliability table for one period: the barks (signals) first seen inside it */
+export function getReliability(window: { from: string; to: string }): Promise<{ from: string; to: string; reliability: InsightsResponse["reliability"] }> {
+  return getJson(`/api/insights/reliability?${new URLSearchParams(window)}`);
 }
 
 export function getWatchlistSparklines(): Promise<SparklinesResponse> {

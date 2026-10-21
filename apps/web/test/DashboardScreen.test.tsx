@@ -82,12 +82,12 @@ const renderDash = () => {
 };
 
 describe("DashboardScreen", () => {
-  it("shows the four KPIs with the 30-day delta", async () => {
+  it("shows the four KPIs with the delta over the chosen period (90 days by default)", async () => {
     stub();
     const { onNavigate } = renderDash();
     const value = await screen.findByRole("button", { name: /^Collection value/ });
     expect(value).toHaveTextContent("$517.69");
-    expect(value).toHaveTextContent("+$37.69 in 30 days");
+    expect(value).toHaveTextContent("+$37.69 in 90 days");
     expect(screen.getByRole("button", { name: /^Paid/ })).toHaveTextContent("$300.00");
     expect(screen.getByRole("button", { name: /^Realized/ })).toHaveTextContent("$12.50");
     const signals = screen.getByRole("button", { name: /^Barks \(Signals\)/ });
@@ -97,7 +97,7 @@ describe("DashboardScreen", () => {
     expect(onNavigate).toHaveBeenCalledWith("watchlist");
   });
 
-  it("a flat month says no change, not +$0.00", async () => {
+  it("a flat period says no change, not +$0.00", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async (url: string) => {
@@ -110,7 +110,7 @@ describe("DashboardScreen", () => {
     );
     renderDash();
     const value = await screen.findByRole("button", { name: /^Collection value/ });
-    expect(await within(value).findByText("No change in 30 days")).toBeInTheDocument();
+    expect(await within(value).findByText("No change in 90 days")).toBeInTheDocument();
     expect(value).not.toHaveTextContent("+$0.00");
   });
 

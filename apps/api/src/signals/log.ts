@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, isNull, lt, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gt, isNull, lt, lte, sql, gte } from "drizzle-orm";
 import type { PriceKind, PriceRole, ReliabilityRow, Signal, SignalType, SourceInfo } from "@retrowatchdog/shared";
 import type { Db } from "../db/index.js";
 import { pricePoints, signalLog } from "../db/schema.js";
@@ -211,7 +211,8 @@ export async function purgeSignalLog(db: Db, cfg: SignalConfig, now: Date = new 
 const MIN_EVALUATED = 10;
 
 /** how often each signal type (and source) held, plus one aggregate row per type */
-export async function reliabilityRows(db: Db): Promise<ReliabilityRow[]> {
+/** Per type and per source; `window` counts only the signals first seen inside it. */
+export async function reliabilityRows(db: Db, window?: { from: string; to: string }): Promise<ReliabilityRow[]> {
   const grouped = await db
     .select({
       type: signalLog.type,
@@ -224,6 +225,14 @@ export async function reliabilityRows(db: Db): Promise<ReliabilityRow[]> {
       gainSum: sql<string | null>`sum(${signalLog.gainUsd}) filter (where ${signalLog.outcome} in ('held', 'beaten'))`,
     })
     .from(signalLog)
+    .where(
+      window === undefined
+        ? undefined
+        : and(
+            gte(signalLog.firstSeenAt, new Date(`${window.from}T00:00:00.000Z`)),
+            lte(signalLog.firstSeenAt, new Date(`${window.to}T23:59:59.999Z`)),
+          ),
+    )
     .groupBy(signalLog.type, signalLog.source);
   const row = (type: string, source: string | null, g: Array<(typeof grouped)[number]>): ReliabilityRow => {
     const sum = (k: "logged" | "evaluated" | "held" | "beaten" | "unknown") => g.reduce((n, r) => n + r[k], 0);

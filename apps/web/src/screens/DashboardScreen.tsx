@@ -14,6 +14,8 @@ import { RecommendationRow } from "../components/RecommendationRow.js";
 import { groupRecommendations } from "../lib/insights.js";
 import { getPlugins } from "../api/plugins.js";
 import { CollectionValueHistory } from "../components/CollectionValueHistory.js";
+import { PeriodControl } from "../components/PeriodControl.js";
+import { periodPhrase, resolvePeriod, usePeriod } from "../lib/period.js";
 import { actOnToday, needsYou, valueDelta, watchesWithSignals } from "../lib/dashboard.js";
 import { formatMoney, formatOriginal, useMoney } from "../lib/money.js";
 import { sourceLabel, useSources } from "../lib/sources.js";
@@ -29,7 +31,6 @@ type Loaded<T> = T | "error" | null;
 const ok = <T,>(v: Loaded<T>): T | null => (v === null || v === "error" ? null : v);
 const loadingNote = (v: Loaded<unknown>): string => (v === "error" ? "Could not load this." : "Loading…");
 
-const DELTA_DAYS = 31;
 const DO_NEXT_MAX = 10;
 
 /** Desktop only: the collection's numbers, what to act on today, and what waits on you. */
@@ -49,14 +50,18 @@ export function DashboardScreen({
   const [watchlist, setWatchlist] = useState<Loaded<WatchlistResponse>>(null);
   const [plugins, setPlugins] = useState<Loaded<PluginDto[]>>(null);
   const [insights, setInsights] = useState<Loaded<InsightsResponse>>(null);
+  const period = usePeriod();
+  const { from, to } = resolvePeriod(period);
 
   useEffect(() => {
     getCollection(basis, markets).then(setCollection, () => setCollection("error"));
-    getCollectionHistory(basis, markets, DELTA_DAYS).then(setHistory, () => setHistory("error"));
     getWatchlist().then(setWatchlist, () => setWatchlist("error"));
     getPlugins().then((r) => setPlugins(r.plugins), () => setPlugins("error"));
     getInsights().then(setInsights, () => setInsights("error"));
   }, [basis, markets]);
+  useEffect(() => {
+    getCollectionHistory(basis, markets, { from, to }).then(setHistory, () => setHistory("error"));
+  }, [basis, markets, from, to]);
 
   const coll = ok(collection);
   const watches = ok(watchlist);
@@ -78,6 +83,7 @@ export function DashboardScreen({
 
   return (
     <div className="dashboard">
+      <PeriodControl />
       <div className="dash-kpis">
         <KPI
           label="Collection value"
@@ -88,8 +94,8 @@ export function DashboardScreen({
               ? undefined
               : // a cent either way is no change worth a sign
                 Math.abs(delta) < 0.005
-                ? "No change in 30 days"
-                : `${delta > 0 ? "+" : "−"}${formatMoney(Math.abs(delta))} in 30 days`
+                ? `No change ${periodPhrase(period)}`
+                : `${delta > 0 ? "+" : "−"}${formatMoney(Math.abs(delta))} ${periodPhrase(period)}`
           }
           onClick={() => onNavigate("collection")}
         />
@@ -185,7 +191,7 @@ export function DashboardScreen({
             )}
           </Panel>
           <Panel>
-            <CollectionValueHistory basis={basis} markets={markets} days={90} defaultOpen />
+            <CollectionValueHistory basis={basis} markets={markets} defaultOpen />
           </Panel>
         </div>
       </div>

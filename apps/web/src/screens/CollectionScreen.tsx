@@ -31,6 +31,7 @@ import { sourceLabel, useSources } from "../lib/sources.js";
 import { COLLECTION_FACETS, facetGroups } from "../lib/facets.js";
 import { loadValuationMarkets, valuationMarketsLabel } from "../lib/valuationMarkets.js";
 import { CollectionValueHistory } from "../components/CollectionValueHistory.js";
+import { PeriodControl } from "../components/PeriodControl.js";
 import { gradeLabel } from "../components/GradeSlider.js";
 import { CopyEditor, editCopyLabel } from "../components/CopyEditor.js";
 import { VerdictLine } from "../components/VerdictLine.js";
@@ -596,6 +597,7 @@ export function CollectionScreen({ onSelect }: { onSelect: (game: GameSummary) =
         </Menu>
       </div>
       {/* its own fold, closed: fetched only when opened */}
+      <PeriodControl />
       <CollectionValueHistory basis={data.valuationBasis} markets={data.valuationMarkets} />
       {view !== "review" && (
         <Segmented

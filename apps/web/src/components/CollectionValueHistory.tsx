@@ -4,8 +4,8 @@ import { getCollectionHistory } from "../api/client.js";
 import { formatMoney } from "../lib/money.js";
 import { HistoryChart } from "./HistoryChart.js";
 import { InfoTip } from "../ui/InfoTip.js";
+import { resolvePeriod, usePeriod } from "../lib/period.js";
 
-const HISTORY_DAYS = 180;
 const LABELS = ["Estimated", "Paid"];
 
 /**
@@ -16,29 +16,28 @@ const LABELS = ["Estimated", "Paid"];
 export function CollectionValueHistory({
   basis,
   markets,
-  days = HISTORY_DAYS,
   defaultOpen = false,
 }: {
   basis: ValuationBasis;
   markets: ValuationMarkets;
-  days?: number;
   /** the dashboard shows it open; the collection keeps it folded */
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const [data, setData] = useState<CollectionHistoryResponse | "error" | null>(null);
+  const { from, to } = resolvePeriod(usePeriod());
 
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
     setData(null);
-    getCollectionHistory(basis, markets, days)
+    getCollectionHistory(basis, markets, { from, to })
       .then((d) => !cancelled && setData(d))
       .catch(() => !cancelled && setData("error"));
     return () => {
       cancelled = true;
     };
-  }, [open, basis, days, markets.country, markets.includeForeign]);
+  }, [open, basis, from, to, markets.country, markets.includeForeign]);
 
   const series =
     data === null || data === "error"

@@ -25,7 +25,6 @@ export interface ActRow {
 }
 
 const ACT_LIMIT = 20;
-const DAY_MS = 86_400_000;
 
 const verdictFor = (signals: Signal[], surface: PillSurface, label: (s: Signal) => string): Verdict | null =>
   // the visibility rule first: a signal without a confidence field counts as high
@@ -59,12 +58,11 @@ export function actOnToday(
 }
 
 /** The value now against the newest point at least 30 days older; null without one. */
+/** The value's change across the points of the chosen period: last day against the first. */
 export function valueDelta(points: CollectionHistoryResponse["points"]): number | null {
+  const first = points[0];
   const last = points.at(-1);
-  if (last === undefined) return null;
-  const cutoff = Date.parse(last.day) - 30 * DAY_MS;
-  const before = points.filter((p) => Date.parse(p.day) <= cutoff).at(-1);
-  return before === undefined ? null : last.estimatedUsd - before.estimatedUsd;
+  return first === undefined || last === undefined || first === last ? null : last.estimatedUsd - first.estimatedUsd;
 }
 
 export const watchesWithSignals = (items: WatchlistItemDto[]): number => items.filter(isBarking).length;

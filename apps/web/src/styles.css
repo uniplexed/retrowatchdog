@@ -217,13 +217,10 @@ html[data-theme="dark"] .chips:has(button.active) button.active { background: va
 .copy-editor textarea { display: block; width: 100%; box-sizing: border-box; margin-top: 4px; }
 .edit-copy { padding: 4px 10px; border-radius: 999px; font-size: 13px; }
 
-/* game view's per-source history chart (viewBox-driven, no fixed width). No
-   preserveAspectRatio="none" on the <svg> and no fixed height here: with a
-   forced height against the 320x120 viewBox's own ratio, the axis/date text
-   and the dot rendered visibly stretched (measured 1.7x taller than wide at
-   phone width). height: auto lets the intrinsic ratio drive the box instead. */
-.history-chart { width: 100%; height: auto; display: block; }
-.history-axis { font-size: 7px; fill: var(--text-muted); }
+/* every history chart: ECharts needs a box with a height to draw into */
+.history-chart { width: 100%; height: 260px; display: block; }
+.period-control { display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center; margin: var(--s-2) 0 var(--s-3); }
+.period-control input[type="date"] { font: inherit; padding: 4px 6px; }
 
 /* the chart's legend: one row per series, since touch has no hover tooltip */
 .price-history summary { cursor: pointer; }

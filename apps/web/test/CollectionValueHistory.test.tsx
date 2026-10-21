@@ -2,6 +2,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CollectionHistoryResponse } from "@retrowatchdog/shared";
+import { resolvePeriod } from "../src/lib/period.js";
 import { CollectionValueHistory } from "../src/components/CollectionValueHistory.js";
 import { resetMoneyForTests } from "../src/lib/money.js";
 
@@ -29,7 +30,9 @@ describe("CollectionValueHistory", () => {
 
     await userEvent.click(screen.getByRole("button", { name: /^Value history/ }));
     expect(await screen.findByRole("img")).toHaveAccessibleName(/your collection/);
-    expect(fetchMock.mock.calls[0][0]).toBe("/api/collection/history?valuation=trade_in&country=GB&includeForeign=false&days=180");
+    // the shared period (90 days by default), as explicit dates
+    const { from, to } = resolvePeriod({ preset: "90d" });
+    expect(fetchMock.mock.calls[0][0]).toBe(`/api/collection/history?valuation=trade_in&country=GB&includeForeign=false&from=${from}&to=${to}`);
     // the legend gives each line its latest value
     expect(screen.getByText("Estimated").closest("li")).toHaveTextContent("$520.00");
     expect(screen.getByText("Paid").closest("li")).toHaveTextContent("$300.00");

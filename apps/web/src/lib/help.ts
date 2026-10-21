@@ -132,8 +132,8 @@ export const HELP = {
   },
   "game.history": {
     name: "Price history",
-    what: "This game's prices over the last 30 days, one line per source, for one region and condition.",
-    example: "CeX UK sells PAL cib at £38, +6% since 18 September.",
+    what: "This game's prices over the period chosen above it, one line per source, for one region and condition. Drag on the chart or its slider to zoom; the corner icon saves it as an image.",
+    example: "a shop sells PAL cib at £38, +6% since 18 September.",
   },
   "history.value": {
     name: "Value history",

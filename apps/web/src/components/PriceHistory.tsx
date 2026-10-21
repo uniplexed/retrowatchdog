@@ -4,10 +4,10 @@ import { getPriceHistory } from "../api/client.js";
 import { formatMoney } from "../lib/money.js";
 import { kindLabel, useSources, type SourcesState } from "../lib/sources.js";
 import { HistoryChart, SERIES_COLOURS } from "./HistoryChart.js";
+import { resolvePeriod, usePeriod } from "../lib/period.js";
+import { PeriodControl } from "./PeriodControl.js";
 import { Panel } from "../ui/Panel.js";
 
-/** fixed window, matching the API's own default */
-const HISTORY_DAYS = 30;
 
 type LoadState = { status: "loading" } | { status: "error" } | { status: "ok"; data: HistoryResponse };
 
@@ -123,12 +123,13 @@ export function PriceHistory({
   const sources = useSources();
   const [state, setState] = useState<LoadState>({ status: "loading" });
   const needsPicker = region === "all" || condition === "all";
+  const { from, to } = resolvePeriod(usePeriod());
 
   useEffect(() => {
     if (needsPicker) return;
     let cancelled = false;
     setState({ status: "loading" });
-    getPriceHistory(gameId, { region, condition, days: HISTORY_DAYS })
+    getPriceHistory(gameId, { region, condition, from, to })
       .then((data) => {
         if (!cancelled) setState({ status: "ok", data });
       })
@@ -138,7 +139,7 @@ export function PriceHistory({
     return () => {
       cancelled = true;
     };
-  }, [needsPicker, gameId, region, condition]);
+  }, [needsPicker, gameId, region, condition, from, to]);
 
   return (
     <Panel
@@ -146,6 +147,7 @@ export function PriceHistory({
       info="game.history"
       className="price-history"
     >
+      <PeriodControl />
       {needsPicker && <p className="source-note">Pick a region and condition to see price history.</p>}
       {!needsPicker && state.status === "loading" && <p className="source-note">Loading history…</p>}
       {!needsPicker && state.status === "error" && <p className="source-note">Could not load the history.</p>}

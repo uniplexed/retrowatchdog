@@ -17,6 +17,7 @@ import { WATCHLIST_FACETS, facetGroups } from "../lib/facets.js";
 import { SIGNAL_TYPE_INFO } from "../lib/signalTypes.js";
 import { sourceLabel, useSources } from "../lib/sources.js";
 import { WatchlistHistory } from "../components/WatchlistHistory.js";
+import { PeriodControl } from "../components/PeriodControl.js";
 import { CsvImportPanel } from "../components/CsvImportPanel.js";
 import { WatchEditor } from "../components/WatchEditor.js";
 import { ListControls, type ControlGroupDef } from "../components/ListControls.js";
@@ -209,6 +210,7 @@ export function WatchlistScreen({ onSelect }: { onSelect: (game: GameSummary) =>
           </a>
         </Menu>
       </div>
+      <PeriodControl />
       <WatchlistHistory />
       {csvOpen && (
         <CsvImportPanel

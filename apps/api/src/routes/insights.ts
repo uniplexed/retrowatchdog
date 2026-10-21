@@ -7,6 +7,7 @@ import { enabledSourceIds } from "../settings/markets.js";
 import { loadSignalConfig, onSignalConfigSaved } from "../settings/signals.js";
 import type { SignalConfig } from "../signals/computeSignals.js";
 import { reliabilityRows } from "../signals/log.js";
+import { MAX_WINDOW_DAYS, parseWindow } from "../lib/window.js";
 import { loadSeries, sliceFor } from "../insights/series.js";
 import { window } from "../insights/money.js";
 import { sellNow } from "../insights/sell.js";
@@ -122,4 +123,12 @@ export function warmInsights(deps: AppDeps, log: { warn: (o: unknown, m: string)
 
 export async function insightsRoutes(app: FastifyInstance): Promise<void> {
   app.get("/api/insights", async () => cachedFor("insights", async () => computeInsights(app.deps, await loadSignalConfig(app.deps.db))));
+
+  // the reliability table for one period: the signals first seen inside it
+  app.get("/api/insights/reliability", async (req, reply) => {
+    const window = parseWindow(req.query as Record<string, unknown>, MAX_WINDOW_DAYS);
+    if (!window.ok) return reply.code(400).send({ error: window.reason });
+    const { from, to, days } = window;
+    return { from, to, days, reliability: await reliabilityRows(app.deps.db, { from, to }) };
+  });
 }
