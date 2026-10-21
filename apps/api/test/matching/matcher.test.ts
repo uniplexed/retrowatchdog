@@ -9,7 +9,7 @@ import { cleanTitle } from "../../src/matching/cleanTitle.js";
 import type { NumeralGame } from "../../src/matching/numerals.js";
 import { findNumeralMismatchedMappings, isNumeralMismatched } from "../../src/matching/reviewNumeralMismatches.js";
 import type { NormalizedListing } from "../../src/adapters/types.js";
-import { classifyCatalogListing } from "../../src/adapters/classifyListing.js";
+import { classifyCatalogListing, classifyListing } from "../../src/adapters/classifyListing.js";
 import type { RawListing } from "../../src/adapters/types.js";
 import { config } from "../../src/config.js";
 
@@ -126,6 +126,20 @@ describe("matching", () => {
     const second = await resolveListing(db, "cex", listing);
     expect(second).toEqual(first);
     expect(await db.select().from(sourceMappings)).toHaveLength(1);
+  });
+  it("a confirmed mapping on another console is re-resolved, not reused (PC copy stuck on the SNES game)", async () => {
+    // Measured 2026-10-21: "SimCity PC Game" stayed on SimCity (SNES) because
+    // it was confirmed before the PC platform existed. A title that now names
+    // a console other than the mapped game's must not keep that mapping.
+    const listing = classifyListing({ sourceProductId: "pc-oot", title: "Zelda Ocarina of Time PC Game", url: null, prices: [] });
+    expect(listing.platformGuess).toBe("pc");
+    await db.insert(sourceMappings).values({
+      gameId: seeded.zeldaId, source: "vinted_uk", sourceProductId: "pc-oot",
+      sourceTitle: listing.title, matchScore: 1, status: "confirmed",
+    });
+    // no PC Zelda in the catalogue: the listing belongs to no game
+    expect(await resolveListing(db, "vinted_uk", listing)).toBeNull();
+    expect(await db.select().from(sourceMappings).where(eq(sourceMappings.sourceProductId, "pc-oot"))).toEqual([]);
   });
 });
 

@@ -2,7 +2,7 @@ import { and, eq, sql } from "drizzle-orm";
 import pino from "pino";
 import type { Platform, SourceId } from "@retrowatchdog/shared";
 import type { Db } from "../db/index.js";
-import { sourceMappings } from "../db/schema.js";
+import { games, sourceMappings } from "../db/schema.js";
 import { config } from "../config.js";
 import type { NormalizedListing } from "../adapters/types.js";
 import { numeralCompatible, type NumeralGame } from "./numerals.js";
@@ -131,16 +131,26 @@ export async function resolveListing(
   source: SourceId,
   listing: NormalizedListing,
 ): Promise<ResolvedMapping | null> {
-  const [existing] = await db
-    .select()
+  const [found] = await db
+    .select({ mapping: sourceMappings, platform: games.platform })
     .from(sourceMappings)
+    .innerJoin(games, eq(games.id, sourceMappings.gameId))
     .where(
       and(
         eq(sourceMappings.source, source),
         eq(sourceMappings.sourceProductId, listing.sourceProductId),
       ),
     );
-  // Confirmed mappings are sticky: reused forever, never re-scored.
+  let existing: typeof sourceMappings.$inferSelect | undefined = found?.mapping;
+  // A mapping whose game is on another console than the title now names was
+  // made before that console could be read (a "PC Game" confirmed onto the
+  // SNES game before PC existed). It is dropped and the listing re-resolved
+  // under the platform filter, like a new one.
+  if (found && listing.platformGuess !== null && found.platform !== listing.platformGuess) {
+    await db.delete(sourceMappings).where(eq(sourceMappings.id, found.mapping.id));
+    existing = undefined;
+  }
+  // Confirmed mappings are sticky: reused, never re-scored.
   if (existing?.status === "confirmed") {
     return { gameId: existing.gameId, score: existing.matchScore, status: "confirmed" };
   }
