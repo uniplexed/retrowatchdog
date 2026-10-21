@@ -92,19 +92,21 @@ export function chartOption(opts: {
         type: "line" as const,
         data: withGaps(s.points),
         connectNulls: false,
-        showSymbol: true,
-        symbolSize: 4,
+        // dots on a short series; a long one reads as a line, and its gaps still break it
+        showSymbol: s.points.length <= 45,
+        symbolSize: 3,
         itemStyle: { color: colour },
         // a wrapped palette reuses a colour, so wrapped series draw dashed
         lineStyle: { color: colour, width: 2, type: i >= colours.length ? ("dashed" as const) : ("solid" as const) },
         markPoint: {
-          symbolSize: 34,
-          label: { fontSize: 9, formatter: (p: { value: number }) => format(p.value) },
+          symbol: "circle",
+          symbolSize: 6,
+          label: { position: "top" as const, fontSize: 10, color: text, formatter: (p: { value: number }) => format(p.value) },
           data: [{ type: "min" as const }, { type: "max" as const }],
         },
         markLine: {
           symbol: "none",
-          label: { color: text, formatter: (p: { value: number }) => `avg ${format(p.value)}` },
+          label: { position: "insideStartTop" as const, color: text, fontSize: 10, formatter: (p: { value: number }) => `avg ${format(p.value)}` },
           data: [{ type: "average" as const }],
         },
       };
